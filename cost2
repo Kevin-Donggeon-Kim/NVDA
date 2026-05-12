@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NVIDIA 분기별 비용 구조 (FY24 Q1 ~ FY26 Q4)</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 24px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+  }
+  .wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+    background: white;
+    padding: 28px 32px;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  }
+  h1 {
+    font-size: 22px;
+    margin: 0 0 4px 0;
+    font-weight: 700;
+  }
+  .subtitle {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 24px;
+  }
+  h2 {
+    font-size: 16px;
+    margin: 28px 0 8px 0;
+    font-weight: 600;
+    color: #333;
+  }
+  .chart-container {
+    position: relative;
+    height: 460px;
+    margin-bottom: 16px;
+  }
+  .chart-container.short {
+    height: 380px;
+  }
+  .note {
+    font-size: 13px;
+    color: #5a4a00;
+    background: #fff8e1;
+    border-left: 3px solid #f4b400;
+    padding: 10px 14px;
+    margin-top: 16px;
+    border-radius: 4px;
+  }
+  .summary {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-top: 20px;
+  }
+  .stat {
+    padding: 12px 14px;
+    border-radius: 4px;
+  }
+  .stat.s1 { background: rgba(229, 115, 115, 0.08); border-left: 3px solid #e57373; }
+  .stat.s2 { background: rgba(100, 181, 246, 0.08); border-left: 3px solid #64b5f6; }
+  .stat.s3 { background: rgba(174, 156, 235, 0.08); border-left: 3px solid #ae9ceb; }
+  .stat.s4 { background: rgba(118, 185, 0, 0.10); border-left: 3px solid #76b900; }
+  .stat-label {
+    font-size: 11px;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+  }
+  .stat-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-top: 4px;
+  }
+  .stat-detail {
+    font-size: 12px;
+    color: #888;
+    margin-top: 2px;
+  }
+  @media (max-width: 700px) {
+    .summary { grid-template-columns: repeat(2, 1fr); }
+    .chart-container { height: 360px; }
+    .chart-container.short { height: 300px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>NVIDIA 분기별 비용 구조</h1>
+  <div class="subtitle">FY24 Q1 → FY26 Q4 · 영업 레버리지의 시각화</div>
+
+  <h2>① 비용 절대금액 (Stacked Bar)</h2>
+  <div class="chart-container">
+    <canvas id="chartAbs"></canvas>
+  </div>
+
+  <h2>② 매출 대비 비용률 (% of Revenue)</h2>
+  <div class="chart-container short">
+    <canvas id="chartPct"></canvas>
+  </div>
+
+  <div class="note">
+    ⚠️ FY26 Q1 COGS 급등 ($10.62B → $17.40B, +64%) — Blackwell 램프업 비용 일회성 흡수. 다음 분기 즉시 정상화.
+  </div>
+
+  <div class="summary">
+    <div class="stat s1">
+      <div class="stat-label">COGS 성장</div>
+      <div class="stat-value">6.7×</div>
+      <div class="stat-detail">$2.55B → $17.03B</div>
+    </div>
+    <div class="stat s2">
+      <div class="stat-label">OpEx 성장</div>
+      <div class="stat-value">2.7×</div>
+      <div class="stat-detail">$2.50B → $6.81B</div>
+    </div>
+    <div class="stat s3">
+      <div class="stat-label">OpEx 비중 감소</div>
+      <div class="stat-value">−24.8%p</div>
+      <div class="stat-detail">34.8% → 10.0%</div>
+    </div>
+    <div class="stat s4">
+      <div class="stat-label">매출 성장 (비교)</div>
+      <div class="stat-value">9.5×</div>
+      <div class="stat-detail">$7.19B → $68.13B</div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+const labels = [
+  'FY24 Q1','FY24 Q2','FY24 Q3','FY24 Q4',
+  'FY25 Q1','FY25 Q2','FY25 Q3','FY25 Q4',
+  'FY26 Q1','FY26 Q2','FY26 Q3','FY26 Q4'
+];
+
+// 절대 금액 (Billion $)
+const cogs = [2.55, 4.04, 4.73, 5.33, 5.62, 7.48, 8.91, 10.62, 17.40, 12.90, 15.16, 17.03];
+const opex = [2.50, 2.67, 2.97, 3.16, 3.52, 3.91, 4.31, 4.68, 5.02, 5.42, 5.82, 6.81];
+const taxOther = [0.10, 0.61, 1.18, 1.33, 2.03, 2.04, 2.56, 1.93, 2.86, 2.01, 4.10, 1.29];
+const netIncome = [2.04, 6.19, 9.24, 12.29, 14.87, 16.61, 19.29, 22.10, 18.77, 26.41, 31.93, 42.99];
+
+// 비율 (% of Revenue)
+const cogsPct = [35.4, 29.9, 26.1, 24.1, 21.6, 24.9, 25.4, 27.0, 39.5, 27.6, 26.6, 25.0];
+const opexPct = [34.8, 19.8, 16.4, 14.3, 13.5, 13.0, 12.3, 11.9, 11.4, 11.6, 10.2, 10.0];
+const taxOtherPct = [1.4, 4.5, 6.5, 6.0, 7.8, 6.8, 7.3, 4.9, 6.5, 4.3, 7.2, 1.9];
+
+// 차트 1: Stacked Bar (절대 금액)
+new Chart(document.getElementById('chartAbs').getContext('2d'), {
+  type: 'bar',
+  data: {
+    labels: labels,
+    datasets: [
+      {
+        label: 'COGS (매출원가)',
+        data: cogs,
+        backgroundColor: 'rgba(229, 115, 115, 0.85)',
+        borderColor: '#e57373',
+        borderWidth: 0,
+        stack: 'cost'
+      },
+      {
+        label: 'OpEx (R&D+SG&A)',
+        data: opex,
+        backgroundColor: 'rgba(100, 181, 246, 0.85)',
+        borderColor: '#64b5f6',
+        borderWidth: 0,
+        stack: 'cost'
+      },
+      {
+        label: '세금+기타',
+        data: taxOther,
+        backgroundColor: 'rgba(174, 156, 235, 0.85)',
+        borderColor: '#ae9ceb',
+        borderWidth: 0,
+        stack: 'cost'
+      },
+      {
+        label: '순이익 (참고)',
+        data: netIncome,
+        backgroundColor: 'rgba(118, 185, 0, 0.65)',
+        borderColor: '#76b900',
+        borderWidth: 0,
+        stack: 'cost'
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: {
+        position: 'top',
+        labels: { boxWidth: 14, padding: 12, font: { size: 12 } }
+      },
+      tooltip: {
+        callbacks: {
+          label: function(ctx) {
+            return ctx.dataset.label + ': $' + ctx.parsed.y.toFixed(2) + 'B';
+          },
+          footer: function(items) {
+            let sum = 0;
+            items.forEach(i => sum += i.parsed.y);
+            return '매출: $' + sum.toFixed(2) + 'B';
+          }
+        }
+      }
+    },
+    scales: {
+      x: {
+        stacked: true,
+        grid: { display: false },
+        ticks: { font: { size: 11 }, maxRotation: 45, minRotation: 45 }
+      },
+      y: {
+        stacked: true,
+        beginAtZero: true,
+        title: { display: true, text: 'Billion $', font: { size: 12, weight: '600' } },
+        grid: { color: 'rgba(0,0,0,0.05)' },
+        ticks: { font: { size: 11 }, callback: v => '$' + v + 'B' }
+      }
+    }
+  }
+});
+
+// 차트 2: 비용률 라인
+new Chart(document.getElementById('chartPct').getContext('2d'), {
+  type: 'line',
+  data: {
+    labels: labels,
+    datasets: [
+      {
+        label: 'COGS % of Rev',
+        data: cogsPct,
+        borderColor: '#e57373',
+        backgroundColor: '#e57373',
+        tension: 0.3,
+        borderWidth: 2.5,
+        pointRadius: 4,
+        pointHoverRadius: 7
+      },
+      {
+        label: 'OpEx % of Rev',
+        data: opexPct,
+        borderColor: '#64b5f6',
+        backgroundColor: '#64b5f6',
+        tension: 0.3,
+        borderWidth: 2.5,
+        pointRadius: 4,
+        pointHoverRadius: 7
+      },
+      {
+        label: '세금+기타 % of Rev',
+        data: taxOtherPct,
+        borderColor: '#ae9ceb',
+        backgroundColor: '#ae9ceb',
+        tension: 0.3,
+        borderWidth: 2.5,
+        pointRadius: 4,
+        pointHoverRadius: 7
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: {
+        position: 'top',
+        labels: { boxWidth: 14, padding: 12, font: { size: 12 } }
+      },
+      tooltip: {
+        callbacks: {
+          label: function(ctx) {
+            return ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(1) + '%';
+          }
+        }
+      }
+    },
+    scales: {
+      x: {
+        grid: { display: false },
+        ticks: { font: { size: 11 }, maxRotation: 45, minRotation: 45 }
+      },
+      y: {
+        beginAtZero: true,
+        max: 45,
+        title: { display: true, text: '% of Revenue', font: { size: 12, weight: '600' } },
+        grid: { color: 'rgba(0,0,0,0.05)' },
+        ticks: { font: { size: 11 }, callback: v => v + '%' }
+      }
+    }
+  }
+});
+</script>
+</body>
+</html>
