@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 가속기 비교 — 2023 / 2026 세대</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,700;9..144,300italic;9..144,500italic;9..144,700italic&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<style>
+  :root {
+    --bg: #f6f2e9;
+    --bg-2: #efe9da;
+    --paper: #fbf9f4;
+    --paper-2: #ffffff;
+    --ink: #1a1814;
+    --ink-2: #4a4540;
+    --ink-3: #8a8278;
+    --ink-4: #b8b0a4;
+    --line: #d9d2c2;
+    --line-2: #e8e2d3;
+    --line-3: #f0ebdd;
+
+    --nv: #5a8f00;
+    --nv-bg: #eef5dc;
+    --google: #1a5fc4;
+    --google-bg: #dee9f8;
+    --google-2: #c0392b;
+    --google-3: #e8a317;
+    --google-4: #1b8048;
+    --aws: #d97706;
+    --aws-bg: #fbeacb;
+    --amd: #c41e1e;
+    --amd-bg: #fadcdc;
+
+    --serif: "Fraunces", "Pretendard Variable", serif;
+    --sans: "Pretendard Variable", "Pretendard", -apple-system, BlinkMacSystemFont, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    padding: 64px 40px 96px;
+    background-image:
+      radial-gradient(800px 400px at 90% 0%, rgba(26,95,196,0.04), transparent 60%),
+      radial-gradient(900px 500px at -10% 30%, rgba(196,30,30,0.03), transparent 60%);
+  }
+
+  .grain {
+    position: fixed; inset: 0; pointer-events: none; opacity: 0.4; z-index: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3CfeColorMatrix values='0 0 0 0 0.1  0 0 0 0 0.08  0 0 0 0 0.06  0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .wrap { max-width: 1320px; margin: 0 auto; position: relative; z-index: 1; }
+
+  /* ── Header ────────────────────────────────────────────── */
+  header {
+    display: grid; grid-template-columns: 1fr auto; gap: 32px; align-items: end;
+    padding-bottom: 28px; border-bottom: 2px solid var(--ink); margin-bottom: 40px;
+  }
+  .eyebrow {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--ink-2); margin-bottom: 16px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .eyebrow::after { content: ""; flex: 1; height: 1px; background: var(--line); max-width: 200px; }
+  h1 {
+    font-family: var(--serif); font-weight: 300;
+    font-size: clamp(40px, 5.5vw, 76px); line-height: 0.98; letter-spacing: -0.025em;
+  }
+  h1 em {
+    font-style: italic; font-weight: 500;
+    background: linear-gradient(95deg, var(--ink) 0%, var(--nv) 30%, var(--google) 55%, var(--amd) 90%);
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .meta {
+    font-family: var(--mono); font-size: 11px; color: var(--ink-2); text-align: right; line-height: 1.9;
+  }
+  .meta .key { color: var(--ink-3); }
+
+  nav.toc {
+    display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 56px;
+    padding: 14px 18px; background: var(--paper); border: 1px solid var(--line);
+    font-family: var(--mono); font-size: 11px;
+  }
+  nav.toc a {
+    color: var(--ink-2); text-decoration: none; padding: 6px 12px;
+    border: 1px solid var(--line); transition: all 0.15s;
+  }
+  nav.toc a:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  nav.toc .label { color: var(--ink-3); padding: 6px 4px; letter-spacing: 0.1em; text-transform: uppercase; }
+
+  /* ── Section heading ───────────────────────────────────── */
+  .section-head {
+    display: grid; grid-template-columns: auto 1fr auto;
+    align-items: baseline; gap: 20px; margin-bottom: 24px;
+    padding-bottom: 14px; border-bottom: 1px solid var(--ink);
+  }
+  .section-num {
+    font-family: var(--serif); font-style: italic; font-weight: 400;
+    font-size: 24px; color: var(--ink-3);
+  }
+  .section-title {
+    font-family: var(--serif); font-weight: 500; font-size: 28px;
+    letter-spacing: -0.015em; line-height: 1.1;
+  }
+  .section-title em { font-style: italic; font-weight: 400; color: var(--ink-2); }
+  .section-tag {
+    font-family: var(--mono); font-size: 11px; color: var(--ink-3); letter-spacing: 0.05em;
+  }
+  .section-intro {
+    font-family: var(--serif); font-style: italic; font-size: 17px;
+    color: var(--ink-2); max-width: 760px; margin-bottom: 32px; line-height: 1.6;
+  }
+  section.viz {
+    margin-bottom: 80px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    padding: 40px;
+  }
+
+  /* ── Legend ────────────────────────────────────────────── */
+  .vendor-legend {
+    display: flex; gap: 20px; flex-wrap: wrap;
+    margin-bottom: 24px;
+    font-family: var(--mono); font-size: 10px; color: var(--ink-2);
+  }
+  .vendor-legend-item { display: flex; align-items: center; gap: 8px; }
+  .vendor-legend .dot { width: 10px; height: 10px; border-radius: 50%; }
+
+  /* ══════════════════════════════════════════════════════════
+     PERFORMANCE TABLE
+     ══════════════════════════════════════════════════════════ */
+  .perf-table-wrap {
+    overflow-x: auto;
+    background: var(--paper-2);
+    border: 1px solid var(--ink);
+  }
+  table.perf {
+    width: 100%;
+    min-width: 880px;
+    border-collapse: collapse;
+    font-family: var(--mono);
+    font-size: 13px;
+  }
+  table.perf thead th {
+    text-align: left;
+    padding: 14px 16px;
+    background: var(--ink);
+    color: var(--paper);
+    font-weight: 500;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border-right: 1px solid #2a2520;
+    white-space: nowrap;
+  }
+  table.perf thead th:last-child { border-right: 0; }
+  table.perf thead th.num { text-align: right; }
+  table.perf thead th .sub {
+    display: block;
+    font-size: 9px;
+    color: var(--ink-4);
+    margin-top: 2px;
+    letter-spacing: 0.06em;
+  }
+
+  table.perf tbody tr {
+    border-bottom: 1px solid var(--line-2);
+    transition: background 0.15s;
+  }
+  table.perf tbody tr:hover { background: var(--bg-2); }
+  table.perf tbody tr:last-child { border-bottom: 0; }
+
+  table.perf tbody td {
+    padding: 14px 16px;
+    vertical-align: middle;
+    font-variant-numeric: tabular-nums;
+  }
+  table.perf td.rank {
+    color: var(--ink-3);
+    font-size: 11px;
+    width: 40px;
+  }
+  table.perf td.chip {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 16px;
+    letter-spacing: -0.005em;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  table.perf td.chip small {
+    font-family: var(--mono); font-size: 10px; color: var(--ink-3);
+    display: block; margin-top: 2px; font-weight: 400; letter-spacing: 0.02em;
+  }
+  table.perf td.vendor-cell {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+  }
+  .vendor-pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 4px 10px;
+    border-radius: 2px;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  .vendor-pill::before {
+    content: ""; width: 6px; height: 6px; border-radius: 50%; display: inline-block;
+  }
+  .vendor-pill.nv     { background: var(--nv-bg);     color: var(--nv); }
+  .vendor-pill.nv::before     { background: var(--nv); }
+  .vendor-pill.google { background: var(--google-bg); color: var(--google); }
+  .vendor-pill.google::before { background: var(--google); }
+  .vendor-pill.aws    { background: var(--aws-bg);    color: var(--aws); }
+  .vendor-pill.aws::before    { background: var(--aws); }
+  .vendor-pill.amd    { background: var(--amd-bg);    color: var(--amd); }
+  .vendor-pill.amd::before    { background: var(--amd); }
+
+  table.perf td.num {
+    text-align: right;
+    font-weight: 500;
+    color: var(--ink);
+  }
+  table.perf td.num .unit {
+    color: var(--ink-3);
+    font-size: 10px;
+    margin-left: 3px;
+    font-weight: 400;
+  }
+  table.perf td.num.dim { color: var(--ink-4); font-weight: 400; }
+  table.perf td.num.dim::before { content: "—"; }
+  table.perf td.year {
+    text-align: right;
+    color: var(--ink-2);
+    font-size: 12px;
+    font-style: italic;
+    font-family: var(--serif);
+  }
+  table.perf td.note-marker {
+    color: var(--ink-3);
+    font-size: 10px;
+    cursor: help;
+  }
+
+  .table-foot {
+    margin-top: 16px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--ink-3);
+    line-height: 1.8;
+  }
+  .table-foot strong { color: var(--ink-2); font-weight: 500; }
+
+  /* ══════════════════════════════════════════════════════════
+     SCATTER
+     ══════════════════════════════════════════════════════════ */
+  .scatter-wrap { width: 100%; overflow-x: auto; }
+  .scatter-svg { width: 100%; height: auto; display: block; min-width: 720px; }
+  .scatter-svg .grid-line { stroke: var(--line-2); stroke-width: 1; }
+  .scatter-svg .axis-line { stroke: var(--ink); stroke-width: 1.5; }
+  .scatter-svg .axis-label {
+    font-family: var(--mono); font-size: 10px; fill: var(--ink-3);
+    letter-spacing: 0.05em;
+  }
+  .scatter-svg .axis-title {
+    font-family: var(--serif); font-size: 13px; font-style: italic; fill: var(--ink-2);
+  }
+  .scatter-svg .point-label {
+    font-family: var(--mono); font-size: 10px; fill: var(--ink); font-weight: 500;
+  }
+  .scatter-svg .point-label-vendor {
+    font-family: var(--mono); font-size: 9px; fill: var(--ink-3);
+  }
+  .scatter-svg .point-nv     { fill: var(--nv); }
+  .scatter-svg .point-google { fill: var(--google); }
+  .scatter-svg .point-aws    { fill: var(--aws); }
+  .scatter-svg .point-amd    { fill: var(--amd); }
+  .scatter-svg .trend-line {
+    stroke: var(--ink-4); stroke-width: 1; stroke-dasharray: 4 4; opacity: 0.5;
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     TIMELINE
+     ══════════════════════════════════════════════════════════ */
+  .timeline-wrap { width: 100%; overflow-x: auto; }
+  .timeline-svg { width: 100%; height: auto; display: block; min-width: 820px; }
+  .timeline-svg .tl-axis { stroke: var(--ink); stroke-width: 1.5; }
+  .timeline-svg .tl-tick { stroke: var(--ink); stroke-width: 1; }
+  .timeline-svg .tl-year {
+    font-family: var(--serif); font-size: 28px; font-style: italic;
+    font-weight: 400; fill: var(--ink);
+  }
+  .timeline-svg .tl-era {
+    font-family: var(--mono); font-size: 10px; fill: var(--ink-3);
+    letter-spacing: 0.1em; text-transform: uppercase;
+  }
+  .timeline-svg .tl-chip {
+    font-family: var(--mono); font-size: 11px; fill: var(--ink); font-weight: 500;
+  }
+  .timeline-svg .tl-chip-sub {
+    font-family: var(--mono); font-size: 9px; fill: var(--ink-3);
+  }
+  .timeline-svg .tl-connector { stroke-width: 1; }
+
+  /* ══════════════════════════════════════════════════════════
+     CARDS
+     ══════════════════════════════════════════════════════════ */
+  .vendor { margin-bottom: 64px; }
+  .vendor-head {
+    display: grid; grid-template-columns: auto 1fr auto;
+    gap: 24px; align-items: baseline; margin-bottom: 24px;
+    padding-bottom: 14px; border-bottom: 1px solid var(--ink);
+  }
+  .vendor-logo {
+    font-family: var(--serif); font-weight: 700; font-style: italic;
+    font-size: 36px; letter-spacing: -0.025em;
+  }
+  .vendor-tag { font-family: var(--mono); font-size: 11px; color: var(--ink-2); letter-spacing: 0.05em; }
+  .vendor-count { font-family: var(--mono); font-size: 11px; color: var(--ink-3); }
+
+  .vendor[data-v="nvidia"] .vendor-logo { color: var(--nv); }
+  .vendor[data-v="google"] .vendor-logo { color: var(--google); }
+  .vendor[data-v="aws"]    .vendor-logo { color: var(--aws); }
+  .vendor[data-v="amd"]    .vendor-logo { color: var(--amd); }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+  }
+  .card {
+    background: var(--paper); padding: 26px 26px 22px;
+    position: relative; display: flex; flex-direction: column; gap: 18px;
+    transition: background 0.2s;
+  }
+  .card:hover { background: var(--paper-2); }
+  .card-stripe { position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+  .vendor[data-v="nvidia"] .card-stripe { background: var(--nv); }
+  .vendor[data-v="google"] .card-stripe {
+    background: linear-gradient(90deg, var(--google) 0% 25%, var(--google-2) 25% 50%, var(--google-3) 50% 75%, var(--google-4) 75% 100%);
+  }
+  .vendor[data-v="aws"] .card-stripe { background: var(--aws); }
+  .vendor[data-v="amd"] .card-stripe { background: var(--amd); }
+
+  .card-top {
+    display: flex; justify-content: space-between; align-items: start; gap: 16px;
+  }
+  .chip-name {
+    font-family: var(--serif); font-weight: 500; font-size: 22px;
+    letter-spacing: -0.01em; line-height: 1.15;
+  }
+  .chip-badge {
+    font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em;
+    color: var(--ink-2); padding: 4px 8px; border: 1px solid var(--line);
+    white-space: nowrap; text-transform: uppercase; background: var(--bg-2);
+  }
+  .headline {
+    display: flex; align-items: baseline; gap: 10px;
+    padding: 12px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  }
+  .headline-val {
+    font-family: var(--serif); font-weight: 500; font-size: 36px;
+    letter-spacing: -0.02em; line-height: 1;
+  }
+  .headline-unit { font-family: var(--mono); font-size: 12px; color: var(--ink-2); }
+  .headline-label {
+    margin-left: auto; font-family: var(--mono); font-size: 9px;
+    color: var(--ink-3); letter-spacing: 0.1em; text-transform: uppercase;
+  }
+  .vendor[data-v="nvidia"] .headline-val { color: var(--nv); }
+  .vendor[data-v="google"] .headline-val { color: var(--google); }
+  .vendor[data-v="aws"]    .headline-val { color: var(--aws); }
+  .vendor[data-v="amd"]    .headline-val { color: var(--amd); }
+
+  .specs { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 22px; }
+  .spec { display: flex; flex-direction: column; gap: 2px; }
+  .spec-label {
+    font-family: var(--mono); font-size: 9px; color: var(--ink-3);
+    letter-spacing: 0.08em; text-transform: uppercase;
+  }
+  .spec-val {
+    font-family: var(--mono); font-size: 13px; color: var(--ink); font-weight: 500;
+  }
+  .spec-val small { color: var(--ink-2); font-weight: 400; font-size: 11px; }
+
+  .note {
+    font-size: 13px; color: var(--ink-2); line-height: 1.55;
+    padding-top: 4px; border-top: 1px dashed var(--line); margin-top: auto;
+  }
+  .note::before { content: "→ "; color: var(--ink-3); font-family: var(--mono); }
+
+  footer {
+    margin-top: 56px; padding-top: 32px; border-top: 2px solid var(--ink);
+    font-family: var(--mono); font-size: 11px; color: var(--ink-3); line-height: 1.9;
+  }
+  footer .takeaway {
+    font-family: var(--serif); font-style: italic; font-size: 22px;
+    color: var(--ink); margin-bottom: 28px; line-height: 1.45; max-width: 760px;
+    letter-spacing: -0.005em;
+  }
+  footer .takeaway em {
+    background: linear-gradient(95deg, var(--nv), var(--google), var(--amd));
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+    font-weight: 500;
+  }
+
+  @media (max-width: 720px) {
+    body { padding: 40px 16px 64px; }
+    header { grid-template-columns: 1fr; align-items: start; }
+    .meta { text-align: left; }
+    section.viz { padding: 24px 16px; }
+    .cards { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="grain"></div>
+<div class="wrap">
+
+  <header>
+    <div>
+      <div class="eyebrow">Datacenter Accelerators · 2023 — 2026</div>
+      <h1>AI 가속기,<br>네 진영의 <em>저정밀 전쟁</em></h1>
+    </div>
+    <div class="meta">
+      <div><span class="key">scope</span> &nbsp; 12 chips</div>
+      <div><span class="key">vendors</span> &nbsp; 4</div>
+      <div><span class="key">timespan</span> &nbsp; ~3 years</div>
+    </div>
+  </header>
+
+  <nav class="toc">
+    <span class="label">↳ Sections</span>
+    <a href="#ch1">01 · 성능 비교표</a>
+    <a href="#ch2">02 · 메모리 × 대역폭</a>
+    <a href="#ch3">03 · 출시 타임라인</a>
+    <a href="#cards">04 · 전체 카드</a>
+  </nav>
+
+  <!-- ══════════════════ 01 · TABLE ══════════════════ -->
+  <section class="viz" id="ch1">
+    <div class="section-head">
+      <div class="section-num">01</div>
+      <div class="section-title">성능 <em>비교표</em></div>
+      <div class="section-tag">per-chip · sorted by FP4 ↓</div>
+    </div>
+    <p class="section-intro">
+      Superchip · 랙 단위가 아닌 단일 칩(또는 단일 GPU) 기준으로 정규화. 같은 정밀도, 같은 단위로 줄을 세우면 누가 frontier에 있는지 분명해진다.
+    </p>
+
+    <div class="vendor-legend">
+      <div class="vendor-legend-item"><span class="dot" style="background:var(--nv)"></span>NVIDIA</div>
+      <div class="vendor-legend-item"><span class="dot" style="background:var(--google)"></span>Google</div>
+      <div class="vendor-legend-item"><span class="dot" style="background:var(--aws)"></span>AWS</div>
+      <div class="vendor-legend-item"><span class="dot" style="background:var(--amd)"></span>AMD</div>
+    </div>
+
+    <div class="perf-table-wrap">
+      <table class="perf">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Chip</th>
+            <th>Vendor</th>
+            <th class="num">FP4 <span class="sub">PFLOPS</span></th>
+            <th class="num">FP8 <span class="sub">PFLOPS</span></th>
+            <th class="num">HBM <span class="sub">GB</span></th>
+            <th class="num">대역폭 <span class="sub">TB/s</span></th>
+            <th class="num">Year</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="rank">01</td>
+            <td class="chip">Rubin GPU <small>preliminary</small></td>
+            <td><span class="vendor-pill nv">NVIDIA</span></td>
+            <td class="num">50<span class="unit">inf</span></td>
+            <td class="num">17.5</td>
+            <td class="num">288</td>
+            <td class="num">22.0</td>
+            <td class="year">2026</td>
+          </tr>
+          <tr>
+            <td class="rank">02</td>
+            <td class="chip">GB200 Superchip <small>2× B200 + Grace</small></td>
+            <td><span class="vendor-pill nv">NVIDIA</span></td>
+            <td class="num">40</td>
+            <td class="num">20.0</td>
+            <td class="num">372</td>
+            <td class="num">16.0</td>
+            <td class="year">2024</td>
+          </tr>
+          <tr>
+            <td class="rank">03</td>
+            <td class="chip">Instinct MI400 <small>projection</small></td>
+            <td><span class="vendor-pill amd">AMD</span></td>
+            <td class="num">40</td>
+            <td class="num">20.0</td>
+            <td class="num">432</td>
+            <td class="num">19.6</td>
+            <td class="year">2026</td>
+          </tr>
+          <tr>
+            <td class="rank">04</td>
+            <td class="chip">B200 <small>per-GPU 환산</small></td>
+            <td><span class="vendor-pill nv">NVIDIA</span></td>
+            <td class="num">20</td>
+            <td class="num">10.0</td>
+            <td class="num">186</td>
+            <td class="num">8.0</td>
+            <td class="year">2024</td>
+          </tr>
+          <tr>
+            <td class="rank">05</td>
+            <td class="chip">TPU 8t <small>training</small></td>
+            <td><span class="vendor-pill google">Google</span></td>
+            <td class="num">12.6</td>
+            <td class="num dim"></td>
+            <td class="num">216</td>
+            <td class="num">6.53</td>
+            <td class="year">2026</td>
+          </tr>
+          <tr>
+            <td class="rank">06</td>
+            <td class="chip">Instinct MI355X <small>CDNA 4</small></td>
+            <td><span class="vendor-pill amd">AMD</span></td>
+            <td class="num">10.1<span class="unit">MX</span></td>
+            <td class="num">5.0</td>
+            <td class="num">288</td>
+            <td class="num">8.0</td>
+            <td class="year">2025</td>
+          </tr>
+          <tr>
+            <td class="rank">07</td>
+            <td class="chip">TPU 8i <small>inference</small></td>
+            <td><span class="vendor-pill google">Google</span></td>
+            <td class="num">10.1</td>
+            <td class="num dim"></td>
+            <td class="num">288</td>
+            <td class="num">8.60</td>
+            <td class="year">2026</td>
+          </tr>
+          <tr>
+            <td class="rank">08</td>
+            <td class="chip">TPU 7x Ironwood <small>Gen 7</small></td>
+            <td><span class="vendor-pill google">Google</span></td>
+            <td class="num dim"></td>
+            <td class="num">4.61</td>
+            <td class="num">192</td>
+            <td class="num">7.38</td>
+            <td class="year">2025</td>
+          </tr>
+          <tr>
+            <td class="rank">09</td>
+            <td class="chip">Trainium 3 <small>MXFP4/8</small></td>
+            <td><span class="vendor-pill aws">AWS</span></td>
+            <td class="num">2.52<span class="unit">MX</span></td>
+            <td class="num">2.52<span class="unit">MX</span></td>
+            <td class="num">144</td>
+            <td class="num">4.9</td>
+            <td class="year">2026</td>
+          </tr>
+          <tr>
+            <td class="rank">10</td>
+            <td class="chip">Instinct MI325X <small>HBM3e</small></td>
+            <td><span class="vendor-pill amd">AMD</span></td>
+            <td class="num dim"></td>
+            <td class="num">2.62</td>
+            <td class="num">256</td>
+            <td class="num">6.0</td>
+            <td class="year">2024</td>
+          </tr>
+          <tr>
+            <td class="rank">11</td>
+            <td class="chip">Instinct MI300X <small>CDNA 3</small></td>
+            <td><span class="vendor-pill amd">AMD</span></td>
+            <td class="num dim"></td>
+            <td class="num">2.61</td>
+            <td class="num">192</td>
+            <td class="num">5.3</td>
+            <td class="year">2023</td>
+          </tr>
+          <tr>
+            <td class="rank">12</td>
+            <td class="chip">Trainium 2 <small>FP8</small></td>
+            <td><span class="vendor-pill aws">AWS</span></td>
+            <td class="num dim"></td>
+            <td class="num">1.30</td>
+            <td class="num">96</td>
+            <td class="num">2.9</td>
+            <td class="year">2024</td>
+          </tr>
+          <tr>
+            <td class="rank">13</td>
+            <td class="chip">Inferentia 2 <small>cFP8 / 0.19 PFLOPS</small></td>
+            <td><span class="vendor-pill aws">AWS</span></td>
+            <td class="num dim"></td>
+            <td class="num">0.19</td>
+            <td class="num">32</td>
+            <td class="num">0.82</td>
+            <td class="year">2023</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-foot">
+      <strong>※ 정규화 기준</strong> — Superchip · NVL72 랙 단위는 per-GPU로 환산. GB300 NVL72(720 PFLOPS FP8 · 72 GPU)는 ~10 PFLOPS / GPU로 B200과 동일하여 별도 행 생략.<br>
+      <strong>※ FP4</strong> — “MX” 표시는 MXFP4 등 microscaling 포맷. Rubin은 NVFP4 추론 기준.<br>
+      <strong>※ TPU 8t · 8i</strong>는 FP8 수치 미공개. <strong>Inferentia 2</strong>는 FP16/BF16/cFP8 기준 190 TFLOPS.
+    </div>
+  </section>
+
+  <!-- ══════════════════ 02 · SCATTER ══════════════════ -->
+  <section class="viz" id="ch2">
+    <div class="section-head">
+      <div class="section-num">02</div>
+      <div class="section-title">메모리 용량 × <em>대역폭</em></div>
+      <div class="section-tag">GB · TB/s · per package</div>
+    </div>
+    <p class="section-intro">
+      LLM 시대의 진짜 병목은 연산이 아니라 메모리다. 오른쪽 위로 갈수록 KV cache · MoE expert · long context를 잘 먹는 칩.
+    </p>
+
+    <div class="vendor-legend">
+      <div class="vendor-legend-item"><span class="dot" style="background:var(--nv)"></span>NVIDIA</div>
+      <div class="vendor-legend-item"><span class="dot" style="background:var(--google)"></span>Google</div>
+      <div class="vendor-legend-item"><span class="dot" style="background:var(--aws)"></span>AWS</div>
+      <div class="vendor-legend-item"><span class="dot" style="background:var(--amd)"></span>AMD</div>
+    </div>
+
+    <div class="scatter-wrap">
+      <svg class="scatter-svg" viewBox="0 0 900 560" xmlns="http://www.w3.org/2000/svg">
+        <!-- Plot area: x 80→860, y 60→480. X: 0-500 GB. Y: 0-25 TB/s. -->
+        <!-- x = 80 + mem*1.56,  y = 480 - bw*16.8 -->
+
+        <!-- Grid -->
+        <g>
+          <line class="grid-line" x1="80" y1="60" x2="80" y2="480"/>
+          <line class="grid-line" x1="236" y1="60" x2="236" y2="480"/>
+          <line class="grid-line" x1="392" y1="60" x2="392" y2="480"/>
+          <line class="grid-line" x1="548" y1="60" x2="548" y2="480"/>
+          <line class="grid-line" x1="704" y1="60" x2="704" y2="480"/>
+          <line class="grid-line" x1="860" y1="60" x2="860" y2="480"/>
+          <line class="grid-line" x1="80" y1="480" x2="860" y2="480"/>
+          <line class="grid-line" x1="80" y1="396" x2="860" y2="396"/>
+          <line class="grid-line" x1="80" y1="312" x2="860" y2="312"/>
+          <line class="grid-line" x1="80" y1="228" x2="860" y2="228"/>
+          <line class="grid-line" x1="80" y1="144" x2="860" y2="144"/>
+          <line class="grid-line" x1="80" y1="60"  x2="860" y2="60"/>
+        </g>
+
+        <line class="axis-line" x1="80" y1="480" x2="860" y2="480"/>
+        <line class="axis-line" x1="80" y1="60"  x2="80"  y2="480"/>
+
+        <text class="axis-label" x="80"  y="500" text-anchor="middle">0</text>
+        <text class="axis-label" x="236" y="500" text-anchor="middle">100</text>
+        <text class="axis-label" x="392" y="500" text-anchor="middle">200</text>
+        <text class="axis-label" x="548" y="500" text-anchor="middle">300</text>
+        <text class="axis-label" x="704" y="500" text-anchor="middle">400</text>
+        <text class="axis-label" x="860" y="500" text-anchor="middle">500</text>
+        <text class="axis-title" x="470" y="540" text-anchor="middle">메모리 용량 (GB)  →</text>
+
+        <text class="axis-label" x="68" y="484" text-anchor="end">0</text>
+        <text class="axis-label" x="68" y="400" text-anchor="end">5</text>
+        <text class="axis-label" x="68" y="316" text-anchor="end">10</text>
+        <text class="axis-label" x="68" y="232" text-anchor="end">15</text>
+        <text class="axis-label" x="68" y="148" text-anchor="end">20</text>
+        <text class="axis-label" x="68" y="64"  text-anchor="end">25</text>
+        <text class="axis-title" x="0" y="0" text-anchor="middle" transform="translate(28,270) rotate(-90)">대역폭 (TB/s)  →</text>
+
+        <line class="trend-line" x1="105" y1="466" x2="780" y2="100"/>
+
+        <!-- B200 Superchip (372, 16) -->
+        <g>
+          <circle class="point-nv" cx="660" cy="211" r="9"/>
+          <text class="point-label" x="676" y="208">B200 Superchip</text>
+          <text class="point-label-vendor" x="676" y="222">372 GB · 16 TB/s</text>
+        </g>
+        <!-- Rubin (288, 22) -->
+        <g>
+          <circle class="point-nv" cx="529" cy="110" r="9"/>
+          <text class="point-label" x="545" y="107">Rubin</text>
+          <text class="point-label-vendor" x="545" y="121">288 GB · 22 TB/s</text>
+        </g>
+
+        <!-- TPU 7x (192, 7.38) → (380, 356) -->
+        <g>
+          <circle class="point-google" cx="380" cy="356" r="9"/>
+          <text class="point-label" x="396" y="353">TPU 7x</text>
+          <text class="point-label-vendor" x="396" y="367">192 GB · 7.38 TB/s</text>
+        </g>
+        <!-- TPU 8t (216, 6.528) → (417, 370) -->
+        <g>
+          <circle class="point-google" cx="417" cy="370" r="9"/>
+          <text class="point-label" x="396" y="395">TPU 8t</text>
+          <text class="point-label-vendor" x="396" y="409">216 GB · 6.53 TB/s</text>
+        </g>
+        <!-- TPU 8i (288, 8.601) → (529, 336) -->
+        <g>
+          <circle class="point-google" cx="529" cy="336" r="9"/>
+          <text class="point-label" x="545" y="333">TPU 8i</text>
+          <text class="point-label-vendor" x="545" y="347">288 GB · 8.60 TB/s</text>
+        </g>
+
+        <!-- Trainium 2 (96, 2.9) → (230, 431) -->
+        <g>
+          <circle class="point-aws" cx="230" cy="431" r="9"/>
+          <text class="point-label" x="246" y="428">Trainium 2</text>
+          <text class="point-label-vendor" x="246" y="442">96 GB · 2.9 TB/s</text>
+        </g>
+        <!-- Trainium 3 (144, 4.9) → (305, 398) -->
+        <g>
+          <circle class="point-aws" cx="305" cy="398" r="9"/>
+          <text class="point-label" x="321" y="395">Trainium 3</text>
+          <text class="point-label-vendor" x="321" y="409">144 GB · 4.9 TB/s</text>
+        </g>
+        <!-- Inferentia 2 (32, 0.82) → (130, 466) -->
+        <g>
+          <circle class="point-aws" cx="130" cy="466" r="9"/>
+          <text class="point-label" x="146" y="463">Inferentia 2</text>
+          <text class="point-label-vendor" x="146" y="475">32 GB · 0.82 TB/s</text>
+        </g>
+
+        <!-- MI300X (192, 5.3) → (380, 391) -->
+        <g>
+          <circle class="point-amd" cx="380" cy="391" r="9"/>
+          <text class="point-label" x="316" y="388" text-anchor="end">MI300X</text>
+          <text class="point-label-vendor" x="316" y="402" text-anchor="end">192 GB · 5.3 TB/s</text>
+        </g>
+        <!-- MI325X (256, 6) → (479, 379) -->
+        <g>
+          <circle class="point-amd" cx="479" cy="379" r="9"/>
+          <text class="point-label" x="416" y="376" text-anchor="end">MI325X</text>
+          <text class="point-label-vendor" x="416" y="390" text-anchor="end">256 GB · 6 TB/s</text>
+        </g>
+        <!-- MI355X (288, 8) → (529, 346) -->
+        <g>
+          <circle class="point-amd" cx="529" cy="346" r="9"/>
+          <text class="point-label" x="466" y="343" text-anchor="end">MI355X</text>
+          <text class="point-label-vendor" x="466" y="357" text-anchor="end">288 GB · 8 TB/s</text>
+        </g>
+        <!-- MI400 (432, 19.6) → (754, 151) -->
+        <g>
+          <circle class="point-amd" cx="754" cy="151" r="9"/>
+          <text class="point-label" x="770" y="148">MI400</text>
+          <text class="point-label-vendor" x="770" y="162">432 GB · 19.6 TB/s</text>
+        </g>
+
+        <text class="axis-title" x="780" y="80" text-anchor="end" opacity="0.6">↗ Frontier</text>
+      </svg>
+    </div>
+
+    <div class="table-foot">
+      <strong>※</strong> GB300 NVL72는 랙 단위(20 TB · 576 TB/s)로 스케일이 달라 제외.<br>
+      <strong>※</strong> B200은 Superchip(2 GPU 합산) 기준. 단일 GPU만 비교하면 ~186 GB · 8 TB/s로 TPU 8i / MI355X 근방.
+    </div>
+  </section>
+
+  <!-- ══════════════════ 03 · TIMELINE ══════════════════ -->
+  <section class="viz" id="ch3">
+    <div class="section-head">
+      <div class="section-num">03</div>
+      <div class="section-title">출시 <em>타임라인</em></div>
+      <div class="section-tag">announce / GA · 2023 — 2026</div>
+    </div>
+    <p class="section-intro">
+      “HBM3 → HBM3e → HBM4” “FP16 → FP8 → FP4” 같은 세대 단절이 동시에 일어난 3년. 2026년에는 네 진영이 모두 동시에 다음 세대를 들고나온다.
+    </p>
+
+    <div class="vendor-legend">
+      <div class="vendor-legend-item"><span class="dot" style="background:var(--nv)"></span>NVIDIA</div>
+      <div class="vendor-legend-item"><span class="dot" style="background:var(--google)"></span>Google</div>
+      <div class="vendor-legend-item"><span class="dot" style="background:var(--aws)"></span>AWS</div>
+      <div class="vendor-legend-item"><span class="dot" style="background:var(--amd)"></span>AMD</div>
+    </div>
+
+    <div class="timeline-wrap">
+      <svg class="timeline-svg" viewBox="0 0 1200 460" xmlns="http://www.w3.org/2000/svg">
+        <!-- Years at x: 2023→200, 2024→480, 2025→760, 2026→1040; axis y=230 -->
+
+        <line class="tl-axis" x1="80" y1="230" x2="1160" y2="230"/>
+
+        <line class="tl-tick" x1="200"  y1="222" x2="200"  y2="238"/>
+        <line class="tl-tick" x1="480"  y1="222" x2="480"  y2="238"/>
+        <line class="tl-tick" x1="760"  y1="222" x2="760"  y2="238"/>
+        <line class="tl-tick" x1="1040" y1="222" x2="1040" y2="238"/>
+
+        <text class="tl-year" x="200"  y="270" text-anchor="middle">2023</text>
+        <text class="tl-year" x="480"  y="270" text-anchor="middle">2024</text>
+        <text class="tl-year" x="760"  y="270" text-anchor="middle">2025</text>
+        <text class="tl-year" x="1040" y="270" text-anchor="middle">2026</text>
+
+        <text class="tl-era" x="200"  y="290" text-anchor="middle">HBM3 · FP8 등장</text>
+        <text class="tl-era" x="480"  y="290" text-anchor="middle">HBM3e · Blackwell</text>
+        <text class="tl-era" x="760"  y="290" text-anchor="middle">FP4 본격화</text>
+        <text class="tl-era" x="1040" y="290" text-anchor="middle">HBM4 · 다음 세대</text>
+
+        <!-- 2023 -->
+        <line class="tl-connector" x1="180" y1="230" x2="180" y2="190" stroke="var(--aws)"/>
+        <circle cx="180" cy="190" r="6" fill="var(--aws)"/>
+        <text class="tl-chip" x="180" y="178" text-anchor="middle">Inferentia 2</text>
+        <text class="tl-chip-sub" x="180" y="166" text-anchor="middle">저비용 추론</text>
+
+        <line class="tl-connector" x1="220" y1="230" x2="220" y2="320" stroke="var(--amd)"/>
+        <circle cx="220" cy="320" r="6" fill="var(--amd)"/>
+        <text class="tl-chip" x="220" y="338" text-anchor="middle">MI300X</text>
+        <text class="tl-chip-sub" x="220" y="350" text-anchor="middle">H100 대항마</text>
+
+        <!-- 2024 -->
+        <line class="tl-connector" x1="440" y1="230" x2="440" y2="170" stroke="var(--nv)"/>
+        <circle cx="440" cy="170" r="6" fill="var(--nv)"/>
+        <text class="tl-chip" x="440" y="158" text-anchor="middle">B200 / GB200</text>
+        <text class="tl-chip-sub" x="440" y="146" text-anchor="middle">Blackwell</text>
+
+        <line class="tl-connector" x1="510" y1="230" x2="510" y2="105" stroke="var(--aws)"/>
+        <circle cx="510" cy="105" r="6" fill="var(--aws)"/>
+        <text class="tl-chip" x="510" y="93" text-anchor="middle">Trainium 2</text>
+        <text class="tl-chip-sub" x="510" y="81" text-anchor="middle">AWS 1세대 학습</text>
+
+        <line class="tl-connector" x1="500" y1="230" x2="500" y2="320" stroke="var(--amd)"/>
+        <circle cx="500" cy="320" r="6" fill="var(--amd)"/>
+        <text class="tl-chip" x="500" y="338" text-anchor="middle">MI325X</text>
+        <text class="tl-chip-sub" x="500" y="350" text-anchor="middle">HBM 256 GB</text>
+
+        <!-- 2025 -->
+        <line class="tl-connector" x1="720" y1="230" x2="720" y2="170" stroke="var(--nv)"/>
+        <circle cx="720" cy="170" r="6" fill="var(--nv)"/>
+        <text class="tl-chip" x="720" y="158" text-anchor="middle">GB300 Ultra</text>
+        <text class="tl-chip-sub" x="720" y="146" text-anchor="middle">FP4 Reasoning</text>
+
+        <line class="tl-connector" x1="790" y1="230" x2="790" y2="105" stroke="var(--google)"/>
+        <circle cx="790" cy="105" r="6" fill="var(--google)"/>
+        <text class="tl-chip" x="790" y="93" text-anchor="middle">TPU 7x Ironwood</text>
+        <text class="tl-chip-sub" x="790" y="81" text-anchor="middle">Google 7세대</text>
+
+        <line class="tl-connector" x1="780" y1="230" x2="780" y2="320" stroke="var(--amd)"/>
+        <circle cx="780" cy="320" r="6" fill="var(--amd)"/>
+        <text class="tl-chip" x="780" y="338" text-anchor="middle">MI355X</text>
+        <text class="tl-chip-sub" x="780" y="350" text-anchor="middle">B200 대항마</text>
+
+        <!-- 2026 -->
+        <line class="tl-connector" x1="1000" y1="230" x2="1000" y2="170" stroke="var(--nv)"/>
+        <circle cx="1000" cy="170" r="6" fill="var(--nv)"/>
+        <text class="tl-chip" x="1000" y="158" text-anchor="middle">Rubin</text>
+        <text class="tl-chip-sub" x="1000" y="146" text-anchor="middle">HBM4 · NVFP4</text>
+
+        <line class="tl-connector" x1="1080" y1="230" x2="1080" y2="105" stroke="var(--google)"/>
+        <circle cx="1080" cy="105" r="6" fill="var(--google)"/>
+        <text class="tl-chip" x="1080" y="93" text-anchor="middle">TPU 8t</text>
+        <text class="tl-chip-sub" x="1080" y="81" text-anchor="middle">대규모 학습</text>
+
+        <line class="tl-connector" x1="1020" y1="230" x2="1020" y2="365" stroke="var(--google)"/>
+        <circle cx="1020" cy="365" r="6" fill="var(--google)"/>
+        <text class="tl-chip" x="1020" y="383" text-anchor="middle">TPU 8i</text>
+        <text class="tl-chip-sub" x="1020" y="395" text-anchor="middle">추론 특화</text>
+
+        <line class="tl-connector" x1="940" y1="230" x2="940" y2="320" stroke="var(--aws)"/>
+        <circle cx="940" cy="320" r="6" fill="var(--aws)"/>
+        <text class="tl-chip" x="940" y="338" text-anchor="middle">Trainium 3</text>
+        <text class="tl-chip-sub" x="940" y="350" text-anchor="middle">2.5× Trn2</text>
+
+        <line class="tl-connector" x1="1100" y1="230" x2="1100" y2="365" stroke="var(--amd)"/>
+        <circle cx="1100" cy="365" r="6" fill="var(--amd)"/>
+        <text class="tl-chip" x="1100" y="383" text-anchor="middle">MI400</text>
+        <text class="tl-chip-sub" x="1100" y="395" text-anchor="middle">Rubin 대항마</text>
+
+        <text class="tl-era" x="80" y="225" text-anchor="start" opacity="0.5">← HBM3</text>
+        <text class="tl-era" x="1160" y="225" text-anchor="end" opacity="0.5">HBM4 →</text>
+      </svg>
+    </div>
+
+    <div class="table-foot">
+      <strong>※</strong> 공식 발표 / GA 시점 기준 근사. TPU 8t · 8i, Rubin, MI400은 2026 예정 / 발표 단계.
+    </div>
+  </section>
+
+  <!-- ══════════════════ 04 · CARDS ══════════════════ -->
+  <div class="section-head" id="cards">
+    <div class="section-num">04</div>
+    <div class="section-title">전체 <em>스펙 카드</em></div>
+    <div class="section-tag">12 chips · per vendor</div>
+  </div>
+  <p class="section-intro" style="margin-bottom:48px;">
+    각 칩의 헤드라인 정밀도와 메모리 · 통신 스펙. 색상 줄무늬는 벤더, 큰 숫자는 그 칩이 자랑하는 정밀도의 PFLOPS.
+  </p>
+
+  <section class="vendor" data-v="nvidia">
+    <div class="vendor-head">
+      <div class="vendor-logo">NVIDIA</div>
+      <div class="vendor-tag">Blackwell → Blackwell Ultra → Rubin</div>
+      <div class="vendor-count">03 / chips</div>
+    </div>
+    <div class="cards">
+      <article class="card">
+        <div class="card-stripe"></div>
+        <div class="card-top">
+          <div class="chip-name">B200 / GB200</div>
+          <div class="chip-badge">Blackwell</div>
+        </div>
+        <div class="headline">
+          <span class="headline-val">40</span><span class="headline-unit">PFLOPS</span>
+          <span class="headline-label">FP4 (Superchip)</span>
+        </div>
+        <div class="specs">
+          <div class="spec"><span class="spec-label">HBM</span><span class="spec-val">372 GB <small>HBM3e</small></span></div>
+          <div class="spec"><span class="spec-label">Bandwidth</span><span class="spec-val">16 TB/s</span></div>
+          <div class="spec"><span class="spec-label">FP8 / FP6</span><span class="spec-val">20 PFLOPS</span></div>
+          <div class="spec"><span class="spec-label">NVLink</span><span class="spec-val">3.6 TB/s</span></div>
+        </div>
+        <p class="note">Blackwell 기본형. NVL72 랙으로 묶는 게 핵심.</p>
+      </article>
+
+      <article class="card">
+        <div class="card-stripe"></div>
+        <div class="card-top">
+          <div class="chip-name">GB300 Blackwell Ultra</div>
+          <div class="chip-badge">NVL72 rack</div>
+        </div>
+        <div class="headline">
+          <span class="headline-val">1,440</span><span class="headline-unit">PFLOPS</span>
+          <span class="headline-label">FP4 (랙 전체)</span>
+        </div>
+        <div class="specs">
+          <div class="spec"><span class="spec-label">HBM (랙)</span><span class="spec-val">20 TB</span></div>
+          <div class="spec"><span class="spec-label">Bandwidth</span><span class="spec-val">576 TB/s</span></div>
+          <div class="spec"><span class="spec-label">FP8 / FP6</span><span class="spec-val">720 PFLOPS</span></div>
+          <div class="spec"><span class="spec-label">NVLink</span><span class="spec-val">130 TB/s</span></div>
+        </div>
+        <p class="note">Blackwell의 추론·Reasoning 강화판.</p>
+      </article>
+
+      <article class="card">
+        <div class="card-stripe"></div>
+        <div class="card-top">
+          <div class="chip-name">Rubin GPU</div>
+          <div class="chip-badge">Preliminary</div>
+        </div>
+        <div class="headline">
+          <span class="headline-val">50</span><span class="headline-unit">PFLOPS</span>
+          <span class="headline-label">NVFP4 추론</span>
+        </div>
+        <div class="specs">
+          <div class="spec"><span class="spec-label">HBM</span><span class="spec-val">288 GB <small>HBM4</small></span></div>
+          <div class="spec"><span class="spec-label">Bandwidth</span><span class="spec-val">22 TB/s</span></div>
+          <div class="spec"><span class="spec-label">NVFP4 학습</span><span class="spec-val">35 PFLOPS</span></div>
+          <div class="spec"><span class="spec-label">NVLink</span><span class="spec-val">3.6 TB/s / GPU</span></div>
+        </div>
+        <p class="note">메모리 대역폭과 scale-up 통신이 Blackwell 대비 크게 강화. 수치는 NVIDIA preliminary.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="vendor" data-v="google">
+    <div class="vendor-head">
+      <div class="vendor-logo">Google</div>
+      <div class="vendor-tag">TPU v7 Ironwood → TPU 8t / 8i</div>
+      <div class="vendor-count">03 / chips</div>
+    </div>
+    <div class="cards">
+      <article class="card">
+        <div class="card-stripe"></div>
+        <div class="card-top">
+          <div class="chip-name">TPU 7x Ironwood</div>
+          <div class="chip-badge">Gen 7</div>
+        </div>
+        <div class="headline">
+          <span class="headline-val">4.61</span><span class="headline-unit">PFLOPS</span>
+          <span class="headline-label">FP8</span>
+        </div>
+        <div class="specs">
+          <div class="spec"><span class="spec-label">Memory</span><span class="spec-val">192 GiB</span></div>
+          <div class="spec"><span class="spec-label">Bandwidth</span><span class="spec-val">7.38 TB/s</span></div>
+          <div class="spec"><span class="spec-label">BF16</span><span class="spec-val">2.307 PFLOPS</span></div>
+          <div class="spec"><span class="spec-label">ICI</span><span class="spec-val">1.2 TB/s</span></div>
+        </div>
+        <p class="note">Google의 7세대 TPU. 대형 추론·학습용 범용 칩.</p>
+      </article>
+
+      <article class="card">
+        <div class="card-stripe"></div>
+        <div class="card-top">
+          <div class="chip-name">TPU 8t</div>
+          <div class="chip-badge">Training</div>
+        </div>
+        <div class="headline">
+          <span class="headline-val">12.6</span><span class="headline-unit">PFLOPS</span>
+          <span class="headline-label">FP4</span>
+        </div>
+        <div class="specs">
+          <div class="spec"><span class="spec-label">Memory</span><span class="spec-val">216 GB</span></div>
+          <div class="spec"><span class="spec-label">Bandwidth</span><span class="spec-val">6.528 TB/s</span></div>
+          <div class="spec"><span class="spec-label">Topology</span><span class="spec-val">3D torus</span></div>
+          <div class="spec"><span class="spec-label">Superpod</span><span class="spec-val">9,600 chips</span></div>
+        </div>
+        <p class="note">대규모 pre-training용. 단일 랙이 아니라 거대한 TPU pod 전략.</p>
+      </article>
+
+      <article class="card">
+        <div class="card-stripe"></div>
+        <div class="card-top">
+          <div class="chip-name">TPU 8i</div>
+          <div class="chip-badge">Inference</div>
+        </div>
+        <div class="headline">
+          <span class="headline-val">10.1</span><span class="headline-unit">PFLOPS</span>
+          <span class="headline-label">FP4</span>
+        </div>
+        <div class="specs">
+          <div class="spec"><span class="spec-label">Memory</span><span class="spec-val">288 GB</span></div>
+          <div class="spec"><span class="spec-label">Bandwidth</span><span class="spec-val">8.601 TB/s</span></div>
+          <div class="spec"><span class="spec-label">Topology</span><span class="spec-val">Boardfly</span></div>
+          <div class="spec"><span class="spec-label">Feature</span><span class="spec-val">CAE 탑재</span></div>
+        </div>
+        <p class="note">추론·sampling·reasoning 특화. KV cache와 MoE 통신 병목을 정조준.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="vendor" data-v="aws">
+    <div class="vendor-head">
+      <div class="vendor-logo">AWS</div>
+      <div class="vendor-tag">Trainium 2 / 3 · Inferentia 2</div>
+      <div class="vendor-count">03 / chips</div>
+    </div>
+    <div class="cards">
+      <article class="card">
+        <div class="card-stripe"></div>
+        <div class="card-top">
+          <div class="chip-name">Trainium 2</div>
+          <div class="chip-badge">Training</div>
+        </div>
+        <div class="headline">
+          <span class="headline-val">1.30</span><span class="headline-unit">PFLOPS</span>
+          <span class="headline-label">FP8</span>
+        </div>
+        <div class="specs">
+          <div class="spec"><span class="spec-label">Memory</span><span class="spec-val">96 GiB</span></div>
+          <div class="spec"><span class="spec-label">Bandwidth</span><span class="spec-val">2.9 TB/s</span></div>
+          <div class="spec"><span class="spec-label">BF16 / FP16</span><span class="spec-val">667 TFLOPS</span></div>
+          <div class="spec"><span class="spec-label">Interconnect</span><span class="spec-val">1.28 TB/s</span></div>
+        </div>
+        <p class="note">H100·Blackwell 대체라기보다 AWS 내부 비용 최적화용에 가까움.</p>
+      </article>
+
+      <article class="card">
+        <div class="card-stripe"></div>
+        <div class="card-top">
+          <div class="chip-name">Trainium 3</div>
+          <div class="chip-badge">Training</div>
+        </div>
+        <div class="headline">
+          <span class="headline-val">2.52</span><span class="headline-unit">PFLOPS</span>
+          <span class="headline-label">MXFP8 / MXFP4</span>
+        </div>
+        <div class="specs">
+          <div class="spec"><span class="spec-label">Memory</span><span class="spec-val">144 GiB</span></div>
+          <div class="spec"><span class="spec-label">Bandwidth</span><span class="spec-val">4.9 TB/s</span></div>
+          <div class="spec"><span class="spec-label">BF16 / FP16</span><span class="spec-val">671 TFLOPS</span></div>
+          <div class="spec"><span class="spec-label">Interconnect</span><span class="spec-val">2.56 TB/s</span></div>
+        </div>
+        <p class="note">Trn2 대비 메모리·통신 크게 개선. 그래도 raw spec은 Rubin · TPU 8 · MI400보다 낮음.</p>
+      </article>
+
+      <article class="card">
+        <div class="card-stripe"></div>
+        <div class="card-top">
+          <div class="chip-name">Inferentia 2</div>
+          <div class="chip-badge">Inference</div>
+        </div>
+        <div class="headline">
+          <span class="headline-val">190</span><span class="headline-unit">TFLOPS</span>
+          <span class="headline-label">FP16 / BF16 / cFP8</span>
+        </div>
+        <div class="specs">
+          <div class="spec"><span class="spec-label">Memory</span><span class="spec-val">32 GiB</span></div>
+          <div class="spec"><span class="spec-label">Bandwidth</span><span class="spec-val">820 GiB/s</span></div>
+          <div class="spec"><span class="spec-label">Interconnect</span><span class="spec-val">NeuronLink-v2</span></div>
+          <div class="spec"><span class="spec-label">Tier</span><span class="spec-val">저비용 추론</span></div>
+        </div>
+        <p class="note">Frontier 학습 경쟁자는 아님. 저비용 대량 추론용 포지션.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="vendor" data-v="amd">
+    <div class="vendor-head">
+      <div class="vendor-logo">AMD</div>
+      <div class="vendor-tag">Instinct MI300X → MI325X → MI355X → MI400</div>
+      <div class="vendor-count">04 / chips</div>
+    </div>
+    <div class="cards">
+      <article class="card">
+        <div class="card-stripe"></div>
+        <div class="card-top">
+          <div class="chip-name">Instinct MI300X</div>
+          <div class="chip-badge">CDNA 3</div>
+        </div>
+        <div class="headline">
+          <span class="headline-val">2.61</span><span class="headline-unit">PFLOPS</span>
+          <span class="headline-label">FP8</span>
+        </div>
+        <div class="specs">
+          <div class="spec"><span class="spec-label">HBM</span><span class="spec-val">192 GB <small>HBM3</small></span></div>
+          <div class="spec"><span class="spec-label">Bandwidth</span><span class="spec-val">5.3 TB/s</span></div>
+          <div class="spec"><span class="spec-label">FP16 / BF16</span><span class="spec-val">1.3 PFLOPS</span></div>
+          <div class="spec"><span class="spec-label">Interconnect</span><span class="spec-val">Infinity Fabric</span></div>
+        </div>
+        <p class="note">H100·H200 대항마였음. 메모리 용량이 강점.</p>
+      </article>
+
+      <article class="card">
+        <div class="card-stripe"></div>
+        <div class="card-top">
+          <div class="chip-name">Instinct MI325X</div>
+          <div class="chip-badge">CDNA 3</div>
+        </div>
+        <div class="headline">
+          <span class="headline-val">2.62</span><span class="headline-unit">PFLOPS</span>
+          <span class="headline-label">FP8</span>
+        </div>
+        <div class="specs">
+          <div class="spec"><span class="spec-label">HBM</span><span class="spec-val">256 GB <small>HBM3e</small></span></div>
+          <div class="spec"><span class="spec-label">Bandwidth</span><span class="spec-val">6 TB/s</span></div>
+          <div class="spec"><span class="spec-label">FP16 / BF16</span><span class="spec-val">1.307 PFLOPS</span></div>
+          <div class="spec"><span class="spec-label">Platform</span><span class="spec-val">MI300X 호환</span></div>
+        </div>
+        <p class="note">HBM 용량을 늘린 MI300X 개선판.</p>
+      </article>
+
+      <article class="card">
+        <div class="card-stripe"></div>
+        <div class="card-top">
+          <div class="chip-name">Instinct MI355X</div>
+          <div class="chip-badge">CDNA 4</div>
+        </div>
+        <div class="headline">
+          <span class="headline-val">10.1</span><span class="headline-unit">PFLOPS</span>
+          <span class="headline-label">MXFP4 / MXFP6</span>
+        </div>
+        <div class="specs">
+          <div class="spec"><span class="spec-label">HBM</span><span class="spec-val">288 GB <small>HBM3e</small></span></div>
+          <div class="spec"><span class="spec-label">Bandwidth</span><span class="spec-val">8 TB/s</span></div>
+          <div class="spec"><span class="spec-label">FP8</span><span class="spec-val">5 PFLOPS</span></div>
+          <div class="spec"><span class="spec-label">IF Links</span><span class="spec-val">7개</span></div>
+        </div>
+        <p class="note">Blackwell B200과 직접 비교되는 AMD의 최신 주력.</p>
+      </article>
+
+      <article class="card">
+        <div class="card-stripe"></div>
+        <div class="card-top">
+          <div class="chip-name">Instinct MI400</div>
+          <div class="chip-badge">Projection</div>
+        </div>
+        <div class="headline">
+          <span class="headline-val">40</span><span class="headline-unit">PFLOPS</span>
+          <span class="headline-label">FP4</span>
+        </div>
+        <div class="specs">
+          <div class="spec"><span class="spec-label">HBM</span><span class="spec-val">432 GB <small>HBM4</small></span></div>
+          <div class="spec"><span class="spec-label">Bandwidth</span><span class="spec-val">19.6 TB/s</span></div>
+          <div class="spec"><span class="spec-label">FP8</span><span class="spec-val">20 PFLOPS</span></div>
+          <div class="spec"><span class="spec-label">Scale-out</span><span class="spec-val">300 GB/s · GPU</span></div>
+        </div>
+        <p class="note">Rubin 세대 직접 경쟁자. AMD가 “engineering projection”이라고 밝힌 수치라 확정 스펙은 아님.</p>
+      </article>
+    </div>
+  </section>
+
+  <footer>
+    <p class="takeaway">
+      세대가 바뀌면서 비교 단위가 FP16 → FP8 → <em>FP4</em>로 한 칸씩 내려갔다. 칩의 절대 성능보다 “어떤 정밀도에서, 어떤 메모리 대역폭과 통신으로 묶이는가”가 진짜 비교축이 됐다.
+    </p>
+    <div>※ 수치 출처 — NVIDIA / Google Cloud / AWS Neuron / AMD 공식 자료. Rubin · MI400 등 일부는 preliminary projection.</div>
+    <div>※ FP4 / FP8 PFLOPS는 dense 기준. 단위·범위는 각 벤더 발표 기준을 따름.</div>
+    <div>※ 비교표는 per-chip(or per-GPU)으로 정규화. Scatter는 GB300 NVL72(랙 스케일) 제외.</div>
+  </footer>
+
+</div>
+</body>
+</html>
