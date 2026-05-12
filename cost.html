@@ -1,0 +1,157 @@
+<h2 class="sr-only">NVIDIA quarterly cost breakdown from FY24 Q1 to FY26 Q4, showing revenue, COGS, R&D, SG&A, and operating income across 12 quarters.</h2>
+
+<div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 1.5rem;">
+  <div style="background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 1rem;">
+    <div style="font-size: 13px; color: var(--color-text-secondary);">FY26 Revenue</div>
+    <div style="font-size: 24px; font-weight: 500; margin-top: 4px;">$215.9B</div>
+    <div style="font-size: 12px; color: var(--color-text-success); margin-top: 4px;">+65% YoY</div>
+  </div>
+  <div style="background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 1rem;">
+    <div style="font-size: 13px; color: var(--color-text-secondary);">FY26 Total cost</div>
+    <div style="font-size: 24px; font-weight: 500; margin-top: 4px;">$85.6B</div>
+    <div style="font-size: 12px; color: var(--color-text-secondary); margin-top: 4px;">COGS + OpEx</div>
+  </div>
+  <div style="background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 1rem;">
+    <div style="font-size: 13px; color: var(--color-text-secondary);">FY26 Op income</div>
+    <div style="font-size: 24px; font-weight: 500; margin-top: 4px;">$130.4B</div>
+    <div style="font-size: 12px; color: var(--color-text-success); margin-top: 4px;">60.4% margin</div>
+  </div>
+  <div style="background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 1rem;">
+    <div style="font-size: 13px; color: var(--color-text-secondary);">FY26 R&D</div>
+    <div style="font-size: 24px; font-weight: 500; margin-top: 4px;">$18.5B</div>
+    <div style="font-size: 12px; color: var(--color-text-secondary); margin-top: 4px;">+43% YoY</div>
+  </div>
+</div>
+
+<div style="margin-bottom: 1.5rem;">
+  <div style="font-size: 14px; font-weight: 500; margin-bottom: 8px;">Revenue vs. cost stack ($M, 12 quarters)</div>
+  <div style="display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 8px; font-size: 12px; color: var(--color-text-secondary);">
+    <span style="display: flex; align-items: center; gap: 6px;"><span style="width: 10px; height: 10px; border-radius: 2px; background: #D85A30;"></span>COGS</span>
+    <span style="display: flex; align-items: center; gap: 6px;"><span style="width: 10px; height: 10px; border-radius: 2px; background: #7F77DD;"></span>R&D</span>
+    <span style="display: flex; align-items: center; gap: 6px;"><span style="width: 10px; height: 10px; border-radius: 2px; background: #5DCAA5;"></span>SG&A</span>
+    <span style="display: flex; align-items: center; gap: 6px;"><span style="width: 10px; height: 10px; border-radius: 2px; background: #378ADD;"></span>Operating income</span>
+  </div>
+  <div style="position: relative; width: 100%; height: 320px;">
+    <canvas id="stackChart" role="img" aria-label="Stacked bar chart of NVIDIA quarterly cost composition.">12-quarter cost stack from FY24 Q1 to FY26 Q4.</canvas>
+  </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 1.5rem;">
+  <div>
+    <div style="font-size: 14px; font-weight: 500; margin-bottom: 8px;">Gross margin & operating margin</div>
+    <div style="position: relative; width: 100%; height: 240px;">
+      <canvas id="marginChart" role="img" aria-label="Gross and operating margin trends.">Margins peaked FY25 Q1, dipped FY26 Q1, recovered FY26 Q4.</canvas>
+    </div>
+  </div>
+  <div>
+    <div style="font-size: 14px; font-weight: 500; margin-bottom: 8px;">Cost as % of revenue</div>
+    <div style="position: relative; width: 100%; height: 240px;">
+      <canvas id="ratioChart" role="img" aria-label="Cost ratios over time.">R&D and SG&A ratios decline as revenue scales.</canvas>
+    </div>
+  </div>
+</div>
+
+<div>
+  <div style="font-size: 14px; font-weight: 500; margin-bottom: 8px;">Annual totals ($B)</div>
+  <div style="position: relative; width: 100%; height: 220px;">
+    <canvas id="annualChart" role="img" aria-label="FY24, FY25, FY26 annual comparison.">FY24 to FY26 annual comparison.</canvas>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const Q = ['FY24 Q1','FY24 Q2','FY24 Q3','FY24 Q4','FY25 Q1','FY25 Q2','FY25 Q3','FY25 Q4','FY26 Q1','FY26 Q2','FY26 Q3','FY26 Q4'];
+const REV  = [7192,13507,18120,22103,26044,30040,35082,39331,44062,46743,57006,68127];
+const COGS = [2544,4045,4720,5312,5638,7466,8926,10608,17394,12890,15157,17034];
+const RD   = [1875,2040,2294,2465,2720,3090,3390,3714,3989,4291,4705,5512];
+const SGA  = [633,622,689,711,777,842,897,975,1041,1122,1134,1282];
+const OI   = REV.map((r,i)=>r - COGS[i] - RD[i] - SGA[i]);
+const GM   = REV.map((r,i)=>+((r-COGS[i])/r*100).toFixed(1));
+const OM   = OI.map((o,i)=>+((o/REV[i])*100).toFixed(1));
+const RDpct  = RD.map((v,i)=>+((v/REV[i])*100).toFixed(1));
+const SGApct = SGA.map((v,i)=>+((v/REV[i])*100).toFixed(1));
+const COGSpct = COGS.map((v,i)=>+((v/REV[i])*100).toFixed(1));
+
+const fmt = (v) => '$' + v.toLocaleString() + 'M';
+const xOpts = { ticks: { autoSkip: false, maxRotation: 45, minRotation: 45, font: { size: 10 } } };
+
+new Chart(document.getElementById('stackChart'), {
+  type: 'bar',
+  data: {
+    labels: Q,
+    datasets: [
+      { label: 'COGS', data: COGS, backgroundColor: '#D85A30', stack: 's' },
+      { label: 'R&D', data: RD, backgroundColor: '#7F77DD', stack: 's' },
+      { label: 'SG&A', data: SGA, backgroundColor: '#5DCAA5', stack: 's' },
+      { label: 'Operating income', data: OI, backgroundColor: '#378ADD', stack: 's' },
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: (c) => c.dataset.label + ': ' + fmt(c.parsed.y) } }
+    },
+    scales: { x: xOpts, y: { stacked: true, ticks: { callback: (v) => '$' + (v/1000) + 'B' } } }
+  }
+});
+
+new Chart(document.getElementById('marginChart'), {
+  type: 'line',
+  data: {
+    labels: Q,
+    datasets: [
+      { label: 'Gross margin %',    data: GM, borderColor: '#0F6E56', backgroundColor: '#0F6E56', borderWidth: 2, tension: 0.25, pointRadius: 3 },
+      { label: 'Operating margin %', data: OM, borderColor: '#534AB7', backgroundColor: '#534AB7', borderWidth: 2, borderDash: [4,4], tension: 0.25, pointRadius: 3 },
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: true, position: 'bottom', labels: { boxWidth: 10, font: { size: 11 } } },
+      tooltip: { callbacks: { label: (c) => c.dataset.label + ': ' + c.parsed.y + '%' } }
+    },
+    scales: { x: xOpts, y: { ticks: { callback: (v) => v + '%' }, suggestedMin: 25, suggestedMax: 85 } }
+  }
+});
+
+new Chart(document.getElementById('ratioChart'), {
+  type: 'line',
+  data: {
+    labels: Q,
+    datasets: [
+      { label: 'COGS / Rev', data: COGSpct, borderColor: '#D85A30', backgroundColor: '#D85A30', borderWidth: 2, tension: 0.25, pointRadius: 3 },
+      { label: 'R&D / Rev',  data: RDpct,  borderColor: '#7F77DD', backgroundColor: '#7F77DD', borderWidth: 2, borderDash: [4,4], tension: 0.25, pointRadius: 3 },
+      { label: 'SG&A / Rev', data: SGApct, borderColor: '#1D9E75', backgroundColor: '#1D9E75', borderWidth: 2, borderDash: [2,2], tension: 0.25, pointRadius: 3 },
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: true, position: 'bottom', labels: { boxWidth: 10, font: { size: 11 } } },
+      tooltip: { callbacks: { label: (c) => c.dataset.label + ': ' + c.parsed.y + '%' } }
+    },
+    scales: { x: xOpts, y: { ticks: { callback: (v) => v + '%' } } }
+  }
+});
+
+new Chart(document.getElementById('annualChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Revenue','COGS','R&D','SG&A','Operating income'],
+    datasets: [
+      { label: 'FY24', data: [60.9, 16.6, 8.7, 2.7, 33.0], backgroundColor: '#B5D4F4' },
+      { label: 'FY25', data: [130.5, 32.6, 12.9, 3.5, 81.5], backgroundColor: '#378ADD' },
+      { label: 'FY26', data: [215.9, 62.5, 18.5, 4.6, 130.4], backgroundColor: '#0C447C' },
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: true, position: 'bottom', labels: { boxWidth: 10, font: { size: 11 } } },
+      tooltip: { callbacks: { label: (c) => c.dataset.label + ': $' + c.parsed.y + 'B' } }
+    },
+    scales: { y: { ticks: { callback: (v) => '$' + v + 'B' } } }
+  }
+});
+</script>
