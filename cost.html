@@ -1,62 +1,233 @@
-<div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 1.5rem;">
-  <div style="background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 1rem;">
-    <div style="font-size: 13px; color: var(--color-text-secondary);">FY26 Revenue</div>
-    <div style="font-size: 24px; font-weight: 500; margin-top: 4px;">$215.9B</div>
-    <div style="font-size: 12px; color: var(--color-text-success); margin-top: 4px;">+65% YoY</div>
-  </div>
-  <div style="background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 1rem;">
-    <div style="font-size: 13px; color: var(--color-text-secondary);">FY26 Total cost</div>
-    <div style="font-size: 24px; font-weight: 500; margin-top: 4px;">$85.6B</div>
-    <div style="font-size: 12px; color: var(--color-text-secondary); margin-top: 4px;">COGS + OpEx</div>
-  </div>
-  <div style="background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 1rem;">
-    <div style="font-size: 13px; color: var(--color-text-secondary);">FY26 Op income</div>
-    <div style="font-size: 24px; font-weight: 500; margin-top: 4px;">$130.4B</div>
-    <div style="font-size: 12px; color: var(--color-text-success); margin-top: 4px;">60.4% margin</div>
-  </div>
-  <div style="background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 1rem;">
-    <div style="font-size: 13px; color: var(--color-text-secondary);">FY26 R&D</div>
-    <div style="font-size: 24px; font-weight: 500; margin-top: 4px;">$18.5B</div>
-    <div style="font-size: 12px; color: var(--color-text-secondary); margin-top: 4px;">+43% YoY</div>
-  </div>
-</div>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NVIDIA FY24 Q1 ~ FY26 Q4 분기별 비용 추이</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #f7f8fa;
+    --surface: #ffffff;
+    --border: #e5e7eb;
+    --text: #0f172a;
+    --muted: #64748b;
+    --accent: #76b900;
+    --accent-dark: #5a8c00;
+    --danger: #dc2626;
+    --danger-bg: #fef2f2;
+    --warning-bg: #fffbeb;
+    --warning-border: #fcd34d;
+    --warning-text: #92400e;
+    --cogs: #d85a30;
+    --rd: #7f77dd;
+    --sga: #5dcaa5;
+    --opinc: #378add;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.55;
+    padding: 32px 20px 60px;
+  }
+  main { max-width: 1100px; margin: 0 auto; }
+  header { margin-bottom: 24px; }
+  h1 {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 6px;
+  }
+  .subtitle {
+    color: var(--muted);
+    font-size: 15px;
+  }
+  .accent { color: var(--accent-dark); font-weight: 600; }
+  .callout {
+    background: var(--warning-bg);
+    border: 1px solid var(--warning-border);
+    border-left: 4px solid #f59e0b;
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin: 20px 0 28px;
+    font-size: 14px;
+    color: var(--warning-text);
+    line-height: 1.6;
+  }
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 32px;
+  }
+  .metric {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+  }
+  .metric .label {
+    font-size: 13px;
+    color: var(--muted);
+    display: block;
+    margin-bottom: 6px;
+  }
+  .metric .value {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    display: block;
+    line-height: 1.1;
+  }
+  .metric .change {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 6px;
+    display: block;
+  }
+  .metric .change.up    { color: var(--accent-dark); font-weight: 600; }
+  .metric .change.down  { color: var(--accent-dark); font-weight: 600; }
+  .metric .change.warn  { color: var(--danger); font-weight: 600; }
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .card-full { grid-column: 1 / -1; }
+  .card h2 {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .card .desc {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+  .chart-wrap { position: relative; width: 100%; }
+  .h280 { height: 280px; }
+  .h320 { height: 320px; }
+  .h240 { height: 240px; }
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .legend i {
+    width: 10px; height: 10px;
+    border-radius: 2px;
+    display: inline-block;
+  }
+  footer {
+    margin-top: 32px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--muted);
+    text-align: center;
+  }
+  @media (max-width: 720px) {
+    .metrics { grid-template-columns: repeat(2, 1fr); }
+    .grid { grid-template-columns: 1fr; }
+    h1 { font-size: 22px; }
+    .metric .value { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>NVIDIA 분기별 비용 구조 추이</h1>
+    <p class="subtitle">FY24 Q1 → FY26 Q4 · 총 비용 <span class="accent">4.7배</span> 증가, 비용 비율 50%→35%로 축소</p>
+  </header>
 
-<div style="margin-bottom: 1.5rem;">
-  <div style="font-size: 14px; font-weight: 500; margin-bottom: 8px;">Revenue vs. cost stack ($M, 12 quarters)</div>
-  <div style="display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 8px; font-size: 12px; color: var(--color-text-secondary);">
-    <span style="display: flex; align-items: center; gap: 6px;"><span style="width: 10px; height: 10px; border-radius: 2px; background: #D85A30;"></span>COGS</span>
-    <span style="display: flex; align-items: center; gap: 6px;"><span style="width: 10px; height: 10px; border-radius: 2px; background: #7F77DD;"></span>R&D</span>
-    <span style="display: flex; align-items: center; gap: 6px;"><span style="width: 10px; height: 10px; border-radius: 2px; background: #5DCAA5;"></span>SG&A</span>
-    <span style="display: flex; align-items: center; gap: 6px;"><span style="width: 10px; height: 10px; border-radius: 2px; background: #378ADD;"></span>Operating income</span>
+  <div class="callout">
+    ⚠️ FY26 Q1 COGS 일시 급증 ($17.4B) — H20 중국 수출 라이선스 충당금 $4.5B 영향. 이후 매출총이익률 75.0%까지 회복.
   </div>
-  <div style="position: relative; width: 100%; height: 320px;">
-    <canvas id="stackChart" role="img" aria-label="Stacked bar chart of NVIDIA quarterly cost composition.">12-quarter cost stack from FY24 Q1 to FY26 Q4.</canvas>
-  </div>
-</div>
 
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 1.5rem;">
-  <div>
-    <div style="font-size: 14px; font-weight: 500; margin-bottom: 8px;">Gross margin & operating margin</div>
-    <div style="position: relative; width: 100%; height: 240px;">
-      <canvas id="marginChart" role="img" aria-label="Gross and operating margin trends.">Margins peaked FY25 Q1, dipped FY26 Q1, recovered FY26 Q4.</canvas>
+  <div class="metrics">
+    <div class="metric">
+      <span class="label">총 비용 증가</span>
+      <span class="value">4.7×</span>
+      <span class="change">$5.05B → $23.83B</span>
+    </div>
+    <div class="metric">
+      <span class="label">COGS / 매출</span>
+      <span class="value">25.0%</span>
+      <span class="change down">−10.4%p</span>
+    </div>
+    <div class="metric">
+      <span class="label">R&D / 매출</span>
+      <span class="value">8.1%</span>
+      <span class="change down">−18.0%p</span>
+    </div>
+    <div class="metric">
+      <span class="label">SG&A / 매출</span>
+      <span class="value">1.9%</span>
+      <span class="change down">−6.9%p</span>
     </div>
   </div>
-  <div>
-    <div style="font-size: 14px; font-weight: 500; margin-bottom: 8px;">Cost as % of revenue</div>
-    <div style="position: relative; width: 100%; height: 240px;">
-      <canvas id="ratioChart" role="img" aria-label="Cost ratios over time.">R&D and SG&A ratios decline as revenue scales.</canvas>
+
+  <div class="card card-full">
+    <h2>분기별 비용 스택 ($M)</h2>
+    <p class="desc">COGS · R&D · SG&A · 영업이익 — 매출 대비 분기 누적 분해</p>
+    <div class="legend">
+      <span><i style="background: var(--cogs);"></i>COGS</span>
+      <span><i style="background: var(--rd);"></i>R&D</span>
+      <span><i style="background: var(--sga);"></i>SG&A</span>
+      <span><i style="background: var(--opinc);"></i>영업이익</span>
+    </div>
+    <div class="chart-wrap h320"><canvas id="stackChart"></canvas></div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>비용 비율 추이 (매출 대비 %)</h2>
+      <p class="desc">매출 성장이 비용을 압도하며 모든 비율 구조적 하락</p>
+      <div class="chart-wrap h280"><canvas id="ratioChart"></canvas></div>
+    </div>
+    <div class="card">
+      <h2>마진 추이 (%)</h2>
+      <p class="desc">FY26 Q1 일시 하락 후 GPM 75% 회복, OPM 65% 정점</p>
+      <div class="chart-wrap h280"><canvas id="marginChart"></canvas></div>
     </div>
   </div>
-</div>
 
-<div>
-  <div style="font-size: 14px; font-weight: 500; margin-bottom: 8px;">Annual totals ($B)</div>
-  <div style="position: relative; width: 100%; height: 220px;">
-    <canvas id="annualChart" role="img" aria-label="FY24, FY25, FY26 annual comparison.">FY24 to FY26 annual comparison.</canvas>
+  <div class="grid">
+    <div class="card">
+      <h2>R&D 절대 지출 ($M)</h2>
+      <p class="desc">매분기 증가, FY26 풀이어 $18.5B (+43% YoY)</p>
+      <div class="chart-wrap h240"><canvas id="rdChart"></canvas></div>
+    </div>
+    <div class="card">
+      <h2>연간 비용 비교 ($B)</h2>
+      <p class="desc">FY24 → FY25 → FY26 누적 비용 구성</p>
+      <div class="chart-wrap h240"><canvas id="annualChart"></canvas></div>
+    </div>
   </div>
-</div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  <footer>
+    Source: NVIDIA quarterly press releases (nvidianews.nvidia.com) · GAAP basis · USD millions
+  </footer>
+</main>
+
 <script>
 const Q = ['FY24 Q1','FY24 Q2','FY24 Q3','FY24 Q4','FY25 Q1','FY25 Q2','FY25 Q3','FY25 Q4','FY26 Q1','FY26 Q2','FY26 Q3','FY26 Q4'];
 const REV  = [7192,13507,18120,22103,26044,30040,35082,39331,44062,46743,57006,68127];
@@ -70,46 +241,37 @@ const RDpct  = RD.map((v,i)=>+((v/REV[i])*100).toFixed(1));
 const SGApct = SGA.map((v,i)=>+((v/REV[i])*100).toFixed(1));
 const COGSpct = COGS.map((v,i)=>+((v/REV[i])*100).toFixed(1));
 
-const fmt = (v) => '$' + v.toLocaleString() + 'M';
-const xOpts = { ticks: { autoSkip: false, maxRotation: 45, minRotation: 45, font: { size: 10 } } };
+const COLOR = { cogs: '#d85a30', rd: '#7f77dd', sga: '#5dcaa5', opinc: '#378add', accent: '#76b900' };
+
+const fmtM = (v) => '$' + v.toLocaleString() + 'M';
+const fmtB = (v) => '$' + (v/1000).toFixed(1) + 'B';
+const xAxis = { ticks: { autoSkip: false, maxRotation: 45, minRotation: 45, font: { size: 10 }, color: '#64748b' }, grid: { display: false } };
+const yGrid = { color: '#f1f5f9', drawBorder: false };
+
+Chart.defaults.font.family = "-apple-system, 'Segoe UI', 'Noto Sans KR', sans-serif";
+Chart.defaults.color = '#64748b';
 
 new Chart(document.getElementById('stackChart'), {
   type: 'bar',
   data: {
     labels: Q,
     datasets: [
-      { label: 'COGS', data: COGS, backgroundColor: '#D85A30', stack: 's' },
-      { label: 'R&D', data: RD, backgroundColor: '#7F77DD', stack: 's' },
-      { label: 'SG&A', data: SGA, backgroundColor: '#5DCAA5', stack: 's' },
-      { label: 'Operating income', data: OI, backgroundColor: '#378ADD', stack: 's' },
+      { label: 'COGS', data: COGS, backgroundColor: COLOR.cogs, stack: 's', borderRadius: 2 },
+      { label: 'R&D', data: RD, backgroundColor: COLOR.rd, stack: 's', borderRadius: 2 },
+      { label: 'SG&A', data: SGA, backgroundColor: COLOR.sga, stack: 's', borderRadius: 2 },
+      { label: '영업이익', data: OI, backgroundColor: COLOR.opinc, stack: 's', borderRadius: 2 },
     ]
   },
   options: {
     responsive: true, maintainAspectRatio: false,
     plugins: {
       legend: { display: false },
-      tooltip: { callbacks: { label: (c) => c.dataset.label + ': ' + fmt(c.parsed.y) } }
+      tooltip: { callbacks: { label: (c) => c.dataset.label + ': ' + fmtM(c.parsed.y) } }
     },
-    scales: { x: xOpts, y: { stacked: true, ticks: { callback: (v) => '$' + (v/1000) + 'B' } } }
-  }
-});
-
-new Chart(document.getElementById('marginChart'), {
-  type: 'line',
-  data: {
-    labels: Q,
-    datasets: [
-      { label: 'Gross margin %',    data: GM, borderColor: '#0F6E56', backgroundColor: '#0F6E56', borderWidth: 2, tension: 0.25, pointRadius: 3 },
-      { label: 'Operating margin %', data: OM, borderColor: '#534AB7', backgroundColor: '#534AB7', borderWidth: 2, borderDash: [4,4], tension: 0.25, pointRadius: 3 },
-    ]
-  },
-  options: {
-    responsive: true, maintainAspectRatio: false,
-    plugins: {
-      legend: { display: true, position: 'bottom', labels: { boxWidth: 10, font: { size: 11 } } },
-      tooltip: { callbacks: { label: (c) => c.dataset.label + ': ' + c.parsed.y + '%' } }
-    },
-    scales: { x: xOpts, y: { ticks: { callback: (v) => v + '%' }, suggestedMin: 25, suggestedMax: 85 } }
+    scales: {
+      x: xAxis,
+      y: { stacked: true, grid: yGrid, ticks: { callback: (v) => '$' + (v/1000) + 'B' } }
+    }
   }
 });
 
@@ -118,38 +280,75 @@ new Chart(document.getElementById('ratioChart'), {
   data: {
     labels: Q,
     datasets: [
-      { label: 'COGS / Rev', data: COGSpct, borderColor: '#D85A30', backgroundColor: '#D85A30', borderWidth: 2, tension: 0.25, pointRadius: 3 },
-      { label: 'R&D / Rev',  data: RDpct,  borderColor: '#7F77DD', backgroundColor: '#7F77DD', borderWidth: 2, borderDash: [4,4], tension: 0.25, pointRadius: 3 },
-      { label: 'SG&A / Rev', data: SGApct, borderColor: '#1D9E75', backgroundColor: '#1D9E75', borderWidth: 2, borderDash: [2,2], tension: 0.25, pointRadius: 3 },
+      { label: 'COGS / 매출', data: COGSpct, borderColor: COLOR.cogs, backgroundColor: COLOR.cogs, borderWidth: 2.5, tension: 0.3, pointRadius: 3, pointHoverRadius: 5 },
+      { label: 'R&D / 매출',  data: RDpct,   borderColor: COLOR.rd,   backgroundColor: COLOR.rd,   borderWidth: 2.5, tension: 0.3, pointRadius: 3, pointHoverRadius: 5 },
+      { label: 'SG&A / 매출', data: SGApct,  borderColor: COLOR.sga,  backgroundColor: COLOR.sga,  borderWidth: 2.5, tension: 0.3, pointRadius: 3, pointHoverRadius: 5 },
     ]
   },
   options: {
     responsive: true, maintainAspectRatio: false,
     plugins: {
-      legend: { display: true, position: 'bottom', labels: { boxWidth: 10, font: { size: 11 } } },
+      legend: { display: true, position: 'bottom', labels: { boxWidth: 10, boxHeight: 10, font: { size: 11 }, padding: 10 } },
       tooltip: { callbacks: { label: (c) => c.dataset.label + ': ' + c.parsed.y + '%' } }
     },
-    scales: { x: xOpts, y: { ticks: { callback: (v) => v + '%' } } }
+    scales: { x: xAxis, y: { grid: yGrid, ticks: { callback: (v) => v + '%' }, beginAtZero: true } }
+  }
+});
+
+new Chart(document.getElementById('marginChart'), {
+  type: 'line',
+  data: {
+    labels: Q,
+    datasets: [
+      { label: 'GPM (매출총이익률)', data: GM, borderColor: COLOR.accent, backgroundColor: COLOR.accent, borderWidth: 2.5, tension: 0.3, pointRadius: 3, pointHoverRadius: 5 },
+      { label: 'OPM (영업이익률)',  data: OM, borderColor: COLOR.opinc,  backgroundColor: COLOR.opinc,  borderWidth: 2.5, tension: 0.3, pointRadius: 3, pointHoverRadius: 5, borderDash: [5,4] },
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: true, position: 'bottom', labels: { boxWidth: 10, boxHeight: 10, font: { size: 11 }, padding: 10 } },
+      tooltip: { callbacks: { label: (c) => c.dataset.label + ': ' + c.parsed.y + '%' } }
+    },
+    scales: { x: xAxis, y: { grid: yGrid, ticks: { callback: (v) => v + '%' }, suggestedMin: 25, suggestedMax: 85 } }
+  }
+});
+
+new Chart(document.getElementById('rdChart'), {
+  type: 'bar',
+  data: {
+    labels: Q,
+    datasets: [{ label: 'R&D', data: RD, backgroundColor: COLOR.rd, borderRadius: 3 }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: (c) => 'R&D: ' + fmtM(c.parsed.y) } }
+    },
+    scales: { x: xAxis, y: { grid: yGrid, ticks: { callback: (v) => '$' + v.toLocaleString() } } }
   }
 });
 
 new Chart(document.getElementById('annualChart'), {
   type: 'bar',
   data: {
-    labels: ['Revenue','COGS','R&D','SG&A','Operating income'],
+    labels: ['COGS', 'R&D', 'SG&A', '영업이익'],
     datasets: [
-      { label: 'FY24', data: [60.9, 16.6, 8.7, 2.7, 33.0], backgroundColor: '#B5D4F4' },
-      { label: 'FY25', data: [130.5, 32.6, 12.9, 3.5, 81.5], backgroundColor: '#378ADD' },
-      { label: 'FY26', data: [215.9, 62.5, 18.5, 4.6, 130.4], backgroundColor: '#0C447C' },
+      { label: 'FY24', data: [16.6, 8.7, 2.7, 33.0], backgroundColor: '#cbd5e1', borderRadius: 3 },
+      { label: 'FY25', data: [32.6, 12.9, 3.5, 81.5], backgroundColor: '#94a3b8', borderRadius: 3 },
+      { label: 'FY26', data: [62.5, 18.5, 4.6, 130.4], backgroundColor: '#0f172a', borderRadius: 3 },
     ]
   },
   options: {
     responsive: true, maintainAspectRatio: false,
     plugins: {
-      legend: { display: true, position: 'bottom', labels: { boxWidth: 10, font: { size: 11 } } },
+      legend: { display: true, position: 'bottom', labels: { boxWidth: 10, boxHeight: 10, font: { size: 11 }, padding: 10 } },
       tooltip: { callbacks: { label: (c) => c.dataset.label + ': $' + c.parsed.y + 'B' } }
     },
-    scales: { y: { ticks: { callback: (v) => '$' + v + 'B' } } }
+    scales: { x: { grid: { display: false } }, y: { grid: yGrid, ticks: { callback: (v) => '$' + v + 'B' } } }
   }
 });
 </script>
+</body>
+</html>
