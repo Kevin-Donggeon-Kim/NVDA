@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NVIDIA FY24 Q1 ~ FY26 Q4 분기별 추이</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 24px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
+    background: #fafafa;
+    color: #1a1a1a;
+  }
+  .wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+    background: white;
+    padding: 28px 32px;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  }
+  h1 {
+    font-size: 22px;
+    margin: 0 0 4px 0;
+    font-weight: 700;
+  }
+  .subtitle {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 24px;
+  }
+  .chart-container {
+    position: relative;
+    height: 500px;
+    margin-bottom: 16px;
+  }
+  .note {
+    font-size: 13px;
+    color: #5a4a00;
+    background: #fff8e1;
+    border-left: 3px solid #f4b400;
+    padding: 10px 14px;
+    margin-top: 16px;
+    border-radius: 4px;
+  }
+  .summary {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-top: 20px;
+  }
+  .stat {
+    padding: 12px 14px;
+    border-radius: 4px;
+  }
+  .stat.s1 { background: rgba(118, 185, 0, 0.08); border-left: 3px solid #76b900; }
+  .stat.s2 { background: rgba(25, 118, 210, 0.08); border-left: 3px solid #1976d2; }
+  .stat.s3 { background: rgba(211, 47, 47, 0.08); border-left: 3px solid #d32f2f; }
+  .stat.s4 { background: rgba(123, 31, 162, 0.08); border-left: 3px solid #7b1fa2; }
+  .stat-label {
+    font-size: 11px;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+  }
+  .stat-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-top: 4px;
+  }
+  .stat-detail {
+    font-size: 12px;
+    color: #888;
+    margin-top: 2px;
+  }
+  @media (max-width: 700px) {
+    .summary { grid-template-columns: repeat(2, 1fr); }
+    .chart-container { height: 400px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>NVIDIA 분기별 매출 & 마진 추이</h1>
+  <div class="subtitle">FY24 Q1 → FY26 Q4 · 매출 9.5배 성장</div>
+
+  <div class="chart-container">
+    <canvas id="chart"></canvas>
+  </div>
+
+  <div class="note">
+    ⚠️ FY26 Q1 GPM 일시 하락 (60.5%) — Blackwell 램프업 비용 영향. 이후 75.0%까지 회복.
+  </div>
+
+  <div class="summary">
+    <div class="stat s1">
+      <div class="stat-label">매출 성장</div>
+      <div class="stat-value">9.5×</div>
+      <div class="stat-detail">$7.19B → $68.13B</div>
+    </div>
+    <div class="stat s2">
+      <div class="stat-label">GPM</div>
+      <div class="stat-value">75.0%</div>
+      <div class="stat-detail">+10.4%p</div>
+    </div>
+    <div class="stat s3">
+      <div class="stat-label">OPM</div>
+      <div class="stat-value">65.0%</div>
+      <div class="stat-detail">+35.2%p</div>
+    </div>
+    <div class="stat s4">
+      <div class="stat-label">NPM</div>
+      <div class="stat-value">63.1%</div>
+      <div class="stat-detail">+34.7%p</div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+const labels = [
+  'FY24 Q1','FY24 Q2','FY24 Q3','FY24 Q4',
+  'FY25 Q1','FY25 Q2','FY25 Q3','FY25 Q4',
+  'FY26 Q1','FY26 Q2','FY26 Q3','FY26 Q4'
+];
+const revenue = [7.19, 13.51, 18.12, 22.10, 26.04, 30.04, 35.08, 39.33, 44.06, 46.74, 57.01, 68.13];
+const gpm = [64.6, 70.1, 73.9, 75.9, 78.4, 75.1, 74.6, 73.0, 60.5, 72.4, 73.4, 75.0];
+const opm = [29.8, 50.3, 57.5, 61.6, 64.9, 62.1, 62.3, 61.1, 49.1, 60.8, 63.2, 65.0];
+const npm = [28.4, 45.8, 51.0, 55.6, 57.1, 55.3, 55.0, 56.2, 42.6, 56.5, 56.0, 63.1];
+
+new Chart(document.getElementById('chart').getContext('2d'), {
+  data: {
+    labels: labels,
+    datasets: [
+      {
+        type: 'bar',
+        label: '매출 ($B)',
+        data: revenue,
+        backgroundColor: 'rgba(118, 185, 0, 0.7)',
+        borderColor: '#76b900',
+        borderWidth: 0,
+        borderRadius: 4,
+        yAxisID: 'y1',
+        order: 3
+      },
+      {
+        type: 'line',
+        label: 'GPM',
+        data: gpm,
+        borderColor: '#1976d2',
+        backgroundColor: '#1976d2',
+        tension: 0.3,
+        borderWidth: 2.5,
+        pointRadius: 4,
+        pointHoverRadius: 7,
+        yAxisID: 'y2',
+        order: 1
+      },
+      {
+        type: 'line',
+        label: 'OPM',
+        data: opm,
+        borderColor: '#d32f2f',
+        backgroundColor: '#d32f2f',
+        tension: 0.3,
+        borderWidth: 2.5,
+        pointRadius: 4,
+        pointHoverRadius: 7,
+        yAxisID: 'y2',
+        order: 1
+      },
+      {
+        type: 'line',
+        label: 'NPM',
+        data: npm,
+        borderColor: '#7b1fa2',
+        backgroundColor: '#7b1fa2',
+        tension: 0.3,
+        borderWidth: 2.5,
+        pointRadius: 4,
+        pointHoverRadius: 7,
+        yAxisID: 'y2',
+        order: 1
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: {
+        position: 'top',
+        labels: { boxWidth: 14, padding: 14, font: { size: 13 } }
+      },
+      tooltip: {
+        callbacks: {
+          label: function(ctx) {
+            const label = ctx.dataset.label || '';
+            const val = ctx.parsed.y;
+            if (label.indexOf('매출') !== -1) return '매출: $' + val.toFixed(2) + 'B';
+            return label + ': ' + val.toFixed(1) + '%';
+          }
+        }
+      }
+    },
+    scales: {
+      x: {
+        grid: { display: false },
+        ticks: { font: { size: 11 }, maxRotation: 45, minRotation: 45 }
+      },
+      y1: {
+        type: 'linear',
+        position: 'left',
+        beginAtZero: true,
+        max: 80,
+        title: { display: true, text: '매출 (Billion $)', font: { size: 12, weight: '600' } },
+        grid: { color: 'rgba(0,0,0,0.05)' },
+        ticks: { font: { size: 11 }, callback: function(v) { return '$' + v + 'B'; } }
+      },
+      y2: {
+        type: 'linear',
+        position: 'right',
+        min: 20,
+        max: 85,
+        title: { display: true, text: '마진 (%)', font: { size: 12, weight: '600' } },
+        grid: { display: false },
+        ticks: { font: { size: 11 }, callback: function(v) { return v + '%'; } }
+      }
+    }
+  }
+});
+</script>
+</body>
+</html>
