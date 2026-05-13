@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>AI 칩 경쟁 구도 (NVIDIA 세대 기준 시계열)</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #faf9f5;
+    --card: #ffffff;
+    --text-primary: #1a1a17;
+    --text-secondary: #5f5e5a;
+    --text-tertiary: #888780;
+    --border: rgba(0,0,0,0.10);
+    --border-strong: rgba(0,0,0,0.22);
+    --row-alt: rgba(0,0,0,0.025);
+    --header-bg: #f1efe8;
+
+    --nvidia: #76B900;
+    --google: #4285F4;
+    --aws: #FF9900;
+    --amd: #ED1C24;
+
+    --past-50: #F1EFE8;
+    --past-700: #888780;
+    --past-800: #5F5E5A;
+
+    --current-50: #E1F5EE;
+    --current-700: #0F6E56;
+    --current-800: #085041;
+
+    --rubin-50: #EEEDFE;
+    --rubin-100: #DAD7FB;
+    --rubin-700: #534AB7;
+    --rubin-800: #3C3489;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1f1e1c;
+      --card: #2a2826;
+      --text-primary: #f0eee6;
+      --text-secondary: #b4b2a9;
+      --text-tertiary: #888780;
+      --border: rgba(255,255,255,0.12);
+      --border-strong: rgba(255,255,255,0.25);
+      --row-alt: rgba(255,255,255,0.03);
+      --header-bg: #353330;
+
+      --past-50: rgba(180,178,169,0.12);
+      --past-700: #B4B2A9;
+      --past-800: #D3D1C7;
+
+      --current-50: rgba(29,158,117,0.18);
+      --current-700: #5DCAA5;
+      --current-800: #9FE1CB;
+
+      --rubin-50: rgba(127,119,221,0.18);
+      --rubin-100: rgba(127,119,221,0.28);
+      --rubin-700: #AFA9EC;
+      --rubin-800: #CECBF6;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 40px 20px;
+    background: var(--bg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
+    color: var(--text-primary);
+    display: flex;
+    justify-content: center;
+    line-height: 1.6;
+  }
+  .wrap {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 32px;
+    max-width: 1180px;
+    width: 100%;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  h1 {
+    font-size: 20px;
+    font-weight: 500;
+    margin: 0 0 4px 0;
+    letter-spacing: -0.01em;
+  }
+  .subtitle {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+  }
+  .caveat {
+    font-size: 12px;
+    color: var(--text-tertiary);
+    margin-bottom: 22px;
+    font-style: italic;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+    table-layout: fixed;
+  }
+  thead th {
+    background: var(--header-bg);
+    color: var(--text-primary);
+    font-weight: 500;
+    text-align: left;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border-strong);
+    font-size: 13px;
+    letter-spacing: 0.01em;
+  }
+  thead th:first-child { border-top-left-radius: 8px; }
+  thead th:last-child  { border-top-right-radius: 8px; }
+  thead th .col-sub {
+    display: block;
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--text-tertiary);
+    margin-top: 2px;
+    letter-spacing: 0;
+  }
+  tbody td {
+    padding: 16px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  tbody tr:nth-child(even) td { background: var(--row-alt); }
+  tbody tr:last-child td { border-bottom: none; }
+
+  .company {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    font-size: 14px;
+  }
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .dot-nvidia { background: var(--nvidia); }
+  .dot-google { background: var(--google); }
+  .dot-aws    { background: var(--aws); }
+  .dot-amd    { background: var(--amd); }
+
+  .chip-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .chip-block {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .chip {
+    display: inline-block;
+    padding: 3px 9px;
+    border-radius: 5px;
+    font-size: 12.5px;
+    font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+    width: fit-content;
+    line-height: 1.4;
+    border: 1px solid transparent;
+  }
+  .chip-past {
+    background: var(--past-50);
+    color: var(--past-800);
+    opacity: 0.85;
+  }
+  .chip-current {
+    background: var(--current-50);
+    color: var(--current-800);
+  }
+  .chip-rubin-shipping {
+    background: var(--rubin-100);
+    color: var(--rubin-800);
+    border: 1px solid var(--rubin-700);
+  }
+  .chip-rubin-production {
+    background: var(--rubin-50);
+    color: var(--rubin-800);
+    border: 1px solid var(--rubin-700);
+  }
+  .chip-rubin-future {
+    background: var(--rubin-50);
+    color: var(--rubin-800);
+    border: 1px dashed var(--rubin-700);
+  }
+  .status {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    padding-left: 2px;
+    line-height: 1.3;
+  }
+  .status-shipping { color: var(--current-700); }
+  .status-production { color: var(--rubin-700); font-weight: 500; }
+
+  .position {
+    color: var(--text-secondary);
+    font-size: 13px;
+    line-height: 1.55;
+  }
+  .strong { font-weight: 500; color: var(--text-primary); }
+  .position-note {
+    display: block;
+    font-size: 11.5px;
+    color: var(--text-tertiary);
+    margin-top: 4px;
+    font-style: italic;
+  }
+
+  .legend {
+    display: flex;
+    gap: 22px;
+    margin-top: 22px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--text-secondary);
+    flex-wrap: wrap;
+  }
+  .legend-item { display: flex; align-items: center; gap: 8px; }
+  .legend-swatch {
+    width: 26px;
+    height: 14px;
+    border-radius: 4px;
+  }
+  .legend-swatch.past    { background: var(--past-50); border: 1px solid var(--past-700); }
+  .legend-swatch.current { background: var(--current-50); border: 1px solid var(--current-700); }
+  .legend-swatch.r-ship  { background: var(--rubin-100); border: 1px solid var(--rubin-700); }
+  .legend-swatch.r-prod  { background: var(--rubin-50); border: 1px solid var(--rubin-700); }
+  .legend-swatch.r-fut   { background: var(--rubin-50); border: 1px dashed var(--rubin-700); }
+
+  @media (max-width: 820px) {
+    .wrap { padding: 20px; }
+    thead { display: none; }
+    tbody td { display: block; padding: 6px 0; border: none; }
+    tbody tr {
+      display: block;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    tbody td:before {
+      content: attr(data-label);
+      display: block;
+      font-size: 11px;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 4px;
+    }
+    tbody td[data-label="진영"]:before { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>AI 칩 경쟁 구도 — NVIDIA 세대 기준 시계열</h1>
+  <div class="subtitle">Google · AWS · AMD는 자체 세대명을 쓰므로, "Hopper/Blackwell/Rubin"은 어디까지나 <span class="strong">NVIDIA 캘린더에 대응하는 시기</span>를 가리킴</div>
+  <div class="caveat">컬럼 = 경쟁 시기, 칩 색·테두리 = 칩의 현재 상태 (양산 / 풀 프로덕션 / 개발 단계)</div>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 11%">진영</th>
+        <th style="width: 19%">Hopper 대응 시기<span class="col-sub">2022 ~ 2024</span></th>
+        <th style="width: 22%">Blackwell 대응 시기<span class="col-sub">2024 ~ 2025</span></th>
+        <th style="width: 24%">Rubin 대응 시기<span class="col-sub">2026 ~</span></th>
+        <th style="width: 24%">핵심 포지션</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td data-label="진영"><span class="company"><span class="dot dot-nvidia"></span>NVIDIA</span></td>
+        <td data-label="Hopper 대응">
+          <div class="chip-list">
+            <span class="chip chip-past">H100</span>
+            <span class="chip chip-past">H200</span>
+            <span class="chip chip-past">GH200 Grace Hopper</span>
+          </div>
+        </td>
+        <td data-label="Blackwell 대응">
+          <div class="chip-list">
+            <span class="chip chip-current">B200</span>
+            <span class="chip chip-current">GB200</span>
+            <span class="chip chip-current">GB300 Blackwell Ultra</span>
+          </div>
+        </td>
+        <td data-label="Rubin 대응">
+          <div class="chip-list">
+            <div class="chip-block">
+              <span class="chip chip-rubin-production">Vera Rubin NVL72</span>
+              <span class="status status-production">풀 프로덕션 (Q1 2026) · 파트너 가용성 H2 2026</span>
+              <span class="status">랙 = Rubin GPU 72 + Vera CPU 36 + NVLink 6</span>
+            </div>
+          </div>
+        </td>
+        <td data-label="핵심 포지션" class="position">
+          GPU + CPU + NVLink + 네트워크 + 랙 + 소프트웨어까지 <span class="strong">풀스택 통합</span>
+          <span class="position-note">"칩을 파는 회사"가 아니라 "AI 인프라 시스템을 파는 회사"로 정의</span>
+        </td>
+      </tr>
+      <tr>
+        <td data-label="진영"><span class="company"><span class="dot dot-google"></span>Google</span></td>
+        <td data-label="Hopper 대응">
+          <div class="chip-list">
+            <span class="chip chip-past">TPU v5e</span>
+            <span class="chip chip-past">TPU v5p</span>
+          </div>
+        </td>
+        <td data-label="Blackwell 대응">
+          <div class="chip-list">
+            <span class="chip chip-current">TPU v6e Trillium</span>
+            <span class="chip chip-current">TPU v7 Ironwood</span>
+          </div>
+        </td>
+        <td data-label="Rubin 대응">
+          <div class="chip-list">
+            <div class="chip-block">
+              <span class="chip chip-rubin-future">TPU 8t</span>
+              <span class="status">학습 전용 · 9,600칩 슈퍼팟 · 발표 (2026.04)</span>
+            </div>
+            <div class="chip-block">
+              <span class="chip chip-rubin-future">TPU 8i</span>
+              <span class="status">추론·에이전트 전용 · 1,152칩 팟 · 발표 (2026.04)</span>
+            </div>
+          </div>
+        </td>
+        <td data-label="핵심 포지션" class="position">
+          Google Cloud / Gemini 전용 <span class="strong">자체 ASIC</span>
+          <span class="position-note">8세대부터 학습(8t) · 추론(8i) 칩을 별도 설계하는 듀얼 트랙 전략</span>
+        </td>
+      </tr>
+      <tr>
+        <td data-label="진영"><span class="company"><span class="dot dot-aws"></span>AWS</span></td>
+        <td data-label="Hopper 대응">
+          <div class="chip-list">
+            <span class="chip chip-past">Trainium1</span>
+            <span class="chip chip-past">Inferentia1</span>
+          </div>
+        </td>
+        <td data-label="Blackwell 대응">
+          <div class="chip-list">
+            <span class="chip chip-current">Trainium2</span>
+            <span class="chip chip-current">Inferentia2</span>
+          </div>
+        </td>
+        <td data-label="Rubin 대응">
+          <div class="chip-list">
+            <div class="chip-block">
+              <span class="chip chip-rubin-shipping">Trainium3</span>
+              <span class="status status-shipping">GA · Trn3 UltraServer 양산 중 (2025.12 ~)</span>
+              <span class="status">3nm · Anthropic / OpenAI / Apple 사용</span>
+            </div>
+            <div class="chip-block">
+              <span class="chip chip-rubin-future">Trainium4</span>
+              <span class="status">개발 중 · 2027 인도 예정 · NVLink Fusion 지원</span>
+            </div>
+          </div>
+        </td>
+        <td data-label="핵심 포지션" class="position">
+          AWS 내부 수요 + Anthropic / OpenAI 등 대형 고객 <span class="strong">비용 절감용 자체 칩</span>
+          <span class="position-note">"NVIDIA 대안" 마케팅보다 "AWS 안에서만 쓰는 저비용 옵션"으로 포지셔닝</span>
+        </td>
+      </tr>
+      <tr>
+        <td data-label="진영"><span class="company"><span class="dot dot-amd"></span>AMD</span></td>
+        <td data-label="Hopper 대응">
+          <div class="chip-list">
+            <span class="chip chip-past">MI250X</span>
+            <span class="chip chip-past">MI300X</span>
+          </div>
+        </td>
+        <td data-label="Blackwell 대응">
+          <div class="chip-list">
+            <span class="chip chip-current">MI325X</span>
+            <span class="chip chip-current">MI350 / MI355X</span>
+          </div>
+        </td>
+        <td data-label="Rubin 대응">
+          <div class="chip-list">
+            <div class="chip-block">
+              <span class="chip chip-rubin-future">MI400 Series</span>
+              <span class="status">GPU 라인업 (MI430X · MI440X · MI455X) · 2026 예정</span>
+            </div>
+            <div class="chip-block">
+              <span class="chip chip-rubin-future">Helios AI Rack</span>
+              <span class="status">랙 스케일 = MI455X 72개 + EPYC Venice + Pensando · 2026</span>
+            </div>
+          </div>
+        </td>
+        <td data-label="핵심 포지션" class="position">
+          NVIDIA 대체 가능한 범용 GPU 진영의 <span class="strong">유일한 대형 경쟁자</span>
+          <span class="position-note">MI400부터 처음으로 랙 스케일(Helios) 시스템 진입 — Blackwell까진 단품 GPU만</span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="legend">
+    <div class="legend-item"><span class="legend-swatch past"></span>Hopper 대응 · 양산 완료, 레거시</div>
+    <div class="legend-item"><span class="legend-swatch current"></span>Blackwell 대응 · 현재 양산 중</div>
+    <div class="legend-item"><span class="legend-swatch r-ship"></span>Rubin 시기 · 이미 GA</div>
+    <div class="legend-item"><span class="legend-swatch r-prod"></span>Rubin 시기 · 풀 프로덕션</div>
+    <div class="legend-item"><span class="legend-swatch r-fut"></span>Rubin 시기 · 발표·개발</div>
+  </div>
+</div>
+</body>
+</html>
